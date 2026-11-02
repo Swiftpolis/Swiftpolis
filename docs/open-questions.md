@@ -3,15 +3,7 @@
 Decisions still needed. Answers move into the relevant doc, and into `adr/` when they are hard
 to reverse, surprising and a real trade-off.
 
-## Round 3, awaiting answers
-
-| # | Question | Recommendation |
-| --- | --- | --- |
-| Q26 | Where do the domain, services and engines live? | A local Swift package, with the app as a thin SwiftUI layer on top |
-| Q27 | How are tests written? | Test-first with Swift Testing for rules and engines; Views are tested by hand |
-| Q28 | How is "exactly the same" checked? | Run the riskiest scenarios against real Persepolis first, and record what it does |
-| Q29 | How far does the first stretch of work go? | Steps 1 to 3, stopping for review after each |
-| Q30 | How is git handled? | Start on `main` with a `.gitignore`; commit at the end of each step |
+None at the moment. New questions will appear here as the build raises them.
 
 ## Resolved
 
@@ -28,7 +20,7 @@ to reverse, surprising and a real trade-off.
 | Q9 | Safari gets menus, popup, cookies and click capture; Chrome family and Firefox stay supported | [ADR 0006](adr/0006-safari-capture-is-best-effort.md) |
 | Q10 | Developer ID, unsandboxed, GPLv3 | [ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md) |
 | Q11 | One-time Persepolis import; keep the control-file format | [data-model.md](data-model.md) |
-| Q12 | macOS 27.0, Apple silicon only, Swift 6 mode. Project not yet changed | [architecture.md](architecture.md) |
+| Q12 | macOS 27.0, Apple silicon only, Swift 6 mode | [architecture.md](architecture.md) |
 | Q13 | Seeding comes after torrent downloading, off by default, following the Preferences design | [video-and-torrent.md](video-and-torrent.md) |
 | Q14 | Bundle Deno | [ADR 0003](adr/0003-bundle-non-swift-helpers.md) |
 | Q15 | yt-dlp in Application Support, self-updating at most daily, with bundled fallback | [ADR 0003](adr/0003-bundle-non-swift-helpers.md) |
@@ -42,3 +34,8 @@ to reverse, surprising and a real trade-off.
 | Q23 | Extension forked into this repo, renamed, macOS only; store extensions stay for other browsers | [browser-integration.md](browser-integration.md) |
 | Q24 | Build order | [roadmap.md](roadmap.md) |
 | Q25 | "New version" notice from a public GitHub repo; no Sparkle yet | [roadmap.md](roadmap.md) |
+| Q26 | Non-UI code in a local Swift package; the app is a thin SwiftUI layer | [ADR 0009](adr/0009-domain-and-services-in-a-local-package.md) |
+| Q27 | Tests first with Swift Testing for rules and engines; Views checked by running the app | [architecture.md](architecture.md) |
+| Q28 | Record real Persepolis's behaviour for the riskiest scenarios before steps 2 and 4 | [roadmap.md](roadmap.md) |
+| Q29 | Build steps 1 to 3, stopping for review after each | [roadmap.md](roadmap.md) |
+| Q30 | Work on `main`, commit at the end of each step without asking, no pushing | [setup-and-build.md](setup-and-build.md) |

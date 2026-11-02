@@ -78,14 +78,25 @@ Config folder on macOS: `~/Library/Application Support/persepolis_download_manag
 - `persepolis_tmp/`, including the `persepolis-plugin-ready` and show-window flag files
 - Notification sounds (`ok`, `fail`, `warning`, `queue`), downloaded from GitHub if missing
 
-## Modelling issues for SwiftData
+## The Swiftpolis model
 
-To handle in the Swift model ([ADR 0005](adr/0005-repositories-behind-viewmodels.md)):
+`SwiftpolisKit/Sources/SwiftpolisPersistence/LibrarySchema.swift` has two `@Model` types in a
+versioned schema: `CategoryRecord` and `DownloadRecord`. Video pair and torrent records arrive in
+the steps that need them. Views and ViewModels only ever see the plain summaries a repository
+returns ([ADR 0005](adr/0005-repositories-behind-viewmodels.md)).
 
-- **Order matters and to-many relationships are unordered.** `gid_list` needs an explicit
-  position, and a Download has one position in its Category and one in All Downloads. Sorting
-  All Downloads changes only the second.
-- **Display strings should not be persisted.** Store bytes and derive labels.
-- **Live progress should not go through the store** at UI rate. Persepolis polls five times a
-  second and writes about once a second.
-- **Credentials belong in the Keychain**, not model fields.
+How it differs from the Persepolis schema:
+
+- **Order is explicit.** `gid_list` becomes `categoryPosition` and `allDownloadsPosition`, because
+  relationships have no order and a Download has one place in each list. Lists show the highest
+  position first, matching Persepolis's newest-first table. Sorting All Downloads changes only the
+  second.
+- **All Downloads has no stored members.** It lists every Download.
+- **No display strings.** Sizes are stored in bytes, and an unknown size or name is `nil` rather
+  than `***`.
+- **Live rate, ETA and Connections aren't stored.** Persepolis polls five times a second and writes
+  about once a second. Swiftpolis keeps these in memory.
+- **No passwords or cookies.** Proxy and site user names are stored, and their secrets go in the
+  Keychain.
+- **Times are minutes since midnight**, not `H:M` text. Import has to convert them.
+- **Dropped:** `limit_enable` and `limit_value` on Categories, which the Speed dial superseded.

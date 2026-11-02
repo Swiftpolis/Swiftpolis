@@ -4,7 +4,11 @@
 that depend on [open questions](open-questions.md) are marked.
 
 **Build targets:** macOS 27.0, Apple silicon only, Swift 6 language mode, App Sandbox off for the
-main app. The Xcode project still has its template values (macOS 27.2, Swift 5, sandbox on).
+main app.
+
+**Testing:** tests are written first, with Swift Testing, for rules and engines. Views are checked by
+running the app. Before steps 2 and 4, the riskiest scenarios are run against real Persepolis and
+recorded, and those results become the reference for the Swift tests.
 
 ## Layers
 
@@ -48,21 +52,24 @@ SwiftData store · control files · Keychain · helper executables
 | `KeepAwakeThread` | Power assertion ([Q19](open-questions.md)) |
 | `browser_integration.py`, `plugins.db` | Extension target and `BrowserRequestInbox` |
 
-## Proposed folders
+## Where code goes
+
+Non-UI code lives in a local package ([ADR 0009](adr/0009-domain-and-services-in-a-local-package.md)).
+This is the intended shape; [project-structure.md](project-structure.md) lists what exists today.
 
 ```
-Swiftpolis/
-├── App/              entry point, scenes, menu bar item, dependency setup
-├── Features/         one folder per screen, each with View and ViewModel
-│   ├── MainWindow/  AddLink/  BatchAdd/  Progress/  Properties/
-│   ├── AfterDownload/  VideoFinder/  Torrent/  Preferences/  Log/  About/
-├── Domain/           plain types: status, schedule times, GID, file classification
-├── Services/         queue, schedule, shutdown, browser, video, torrent
-├── Engines/          HTTP, yt-dlp, torrent
-├── Persistence/      @Model types, repositories, Persepolis import
-└── Support/          logging, formatting, Keychain
-SwiftpolisTests/      queue, schedule, engine, and parsing tests
-SafariExtension/      extension target with its web resources
+Swiftpolis/                 App target
+├── App/                    entry point, scenes, menu bar item, dependency setup
+└── Features/               one folder per screen, each with View and ViewModel
+    ├── MainWindow/  AddLink/  BatchAdd/  Progress/  Properties/
+    └── AfterDownload/  VideoFinder/  Torrent/  Preferences/  Log/  About/
+SwiftpolisKit/              Local package
+├── SwiftpolisDomain        plain types: status, schedule times, GID, file classification
+├── SwiftpolisPersistence   @Model types, repositories, Persepolis import
+├── SwiftpolisEngines       HTTP, yt-dlp, torrent
+├── SwiftpolisServices      queue, schedule, shutdown, browser, video, torrent
+└── SwiftpolisTestSupport   fake clock and fake engine
+SafariExtension/            extension target with its web resources
 ```
 
 ## Testing

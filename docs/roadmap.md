@@ -14,15 +14,19 @@ checklist of features is in [features.md](features.md).
 | 7. Torrents | libtorrent wrapper, magnet and file flows, file selection; then seeding | A torrent downloads with selected files, then seeds when enabled |
 | 8. Release | Persepolis import, 18 languages, shortcuts, remaining windows, notarized DMG | Everything in features.md is ticked |
 
+**Current state:** step 1 is built, and work stops for review after each of steps 1 to 3.
+
 ## Early checks
 
 These could change the plan, so they happen at the start of the step that depends on them.
 
 | Step | Check |
 | --- | --- |
+| 2 | Record real Persepolis's HTTP behaviour against a local server, including D6, D8 and D12 |
 | 2 | One `URLSession` per Connection opens separate connections to an HTTP/2 server |
 | 2 | SOCKS5 and authenticated proxies work through `ProxyConfiguration` |
 | 3 | Shutting down through a system request works from an unsandboxed app |
+| 4 | Record real Persepolis's Queue Passes, order and clock times, including D2 and D9 |
 | 5 | The Safari handler can write to the App Group and open a `swiftpolis://` link |
 | 5 | Clipboard detection under macOS 27's privacy prompts |
 | 6 | The PyInstaller-based `yt-dlp_macos` survives notarization, and can self-update from Application Support |

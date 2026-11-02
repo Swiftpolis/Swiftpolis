@@ -10,7 +10,8 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
   (`Side_Projects/persepolis`)
 - **Parity rule:** same rules, with known defects fixed ([ADR 0001](adr/0001-parity-with-defects-fixed.md))
 - **Distribution:** Developer ID, unsandboxed, GPLv3 ([ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md))
-- **Status:** design. The Xcode project is still the unmodified SwiftData template.
+- **Status:** step 1 of 8 ([roadmap.md](roadmap.md)). The app opens with its Categories and can't
+  download anything yet.
 
 ## Documentation index
 
@@ -27,8 +28,10 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
 | [browser-integration.md](browser-integration.md) | Wire protocol, extension behaviour, Safari constraints | From source |
 | [upstream-defects.md](upstream-defects.md) | Persepolis bugs found while reading, to fix or keep | From source |
 | [architecture.md](architecture.md) | Proposed MVVM structure | Draft |
+| [project-structure.md](project-structure.md) | Where the code is, file by file | Living |
+| [setup-and-build.md](setup-and-build.md) | Run the tests and the app; the project file format | Living |
 | [roadmap.md](roadmap.md) | Build order and the early checks in each step | Living |
-| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0008 | Living |
+| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0009 | Living |
 
 "From source" docs describe what Persepolis does, found by reading its code. The
 code was not run, so runtime claims have not been confirmed by observation. They
