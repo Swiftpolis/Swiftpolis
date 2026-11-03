@@ -33,4 +33,5 @@ reading the code so far.
 | D24 | Confirmed, minor | `#HttpOnly_` cookie lines are ignored | `readCookieJar` | Those cookies aren't sent | Strip the prefix |
 | D25 | Confirmed, minor | `error_message` is never cleared | `getFileSize` | A `complete` download can still carry `Error` | Clear it, or only set it on failure |
 | D26 | Read | A finished file with the same name is overwritten | `createControlFile` | Downloading to a folder that already has that file name, with no control file, truncates the existing file | Pick a new name |
+| D28 | Read | Removing a Download deletes any file with its name | `DeleteThingsThatAreNoLongerNeededThread` | A Download that never ran, whose Spider-found name matches a file you already have, deletes that file when removed | Delete only if the Download's control file is beside it |
 | D27 | Read | A server-supplied name isn't checked | `getFileName`, then `os.path.join` | A `Content-Disposition` name like `../../x` could write outside the download folder | Keep only the last path component |

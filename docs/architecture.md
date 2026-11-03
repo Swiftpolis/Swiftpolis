@@ -36,11 +36,24 @@ SwiftData store · control files · Keychain · helper executables
   status changes and periodic progress reach SwiftData.
 - **Time comes from an injected clock**, so schedule tests don't wait for real minutes.
 
+## How live data reaches the windows
+
+```
+Engines ── polled 5 times a second ──▶ DownloadCoordinator ── events ──▶ AppModel ──▶ ViewModels ──▶ Views
+                                              │ about once a second, and on every finish
+                                              ▼
+                                        LibraryRepository
+```
+
+`AppModel` is the one object the whole app shares. It holds live progress and preferences, and it
+handles what happens when a Download starts or finishes, because that has to work with any set of
+windows open, or none.
+
 ## Persepolis to Swiftpolis
 
 | Persepolis | Swiftpolis |
 | --- | --- |
-| `mainwindow.py` | `MainWindowViewModel`, `QueueService`, `DownloadService` |
+| `mainwindow.py` | `MainWindowViewModel`, `AppModel`, `DownloadCoordinator`, and `QueueRunner` in step 4 |
 | `QThread` and polling loops | Actors, `Task`, `AsyncStream` |
 | `queue.py` | `QueueRunner` |
 | `persepolis_lib_prime.py` | `HTTPDownloadEngine` |

@@ -9,7 +9,15 @@ cd SwiftpolisKit && swift test
 ```
 
 Tests cover the package. Views are checked by running the app. Engine tests run against a server on
-loopback and take about 15 seconds.
+loopback and take about 15 seconds. One test writes a throwaway item to your login Keychain and removes it.
+
+The first real download into `~/Downloads` may make macOS ask for permission to use that folder.
+
+## Debug automation
+
+Debug builds can run without anyone at the keyboard, using a throwaway folder in place of your real
+library, preferences and Keychain. Clipboard reading is off in this mode. Release builds don't contain
+this. The variables are described in `Swiftpolis/Support/DebugAutomation.swift`.
 
 ## Record Persepolis's behaviour
 

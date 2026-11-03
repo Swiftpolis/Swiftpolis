@@ -44,6 +44,12 @@
         }, {
           "product-name": "SwiftpolisPersistence",
           "build-phase": { "build-phase": "frameworks" },
+        }, {
+          "product-name": "SwiftpolisEngines",
+          "build-phase": { "build-phase": "frameworks" },
+        }, {
+          "product-name": "SwiftpolisServices",
+          "build-phase": { "build-phase": "frameworks" },
         },
       ],
       "build-settings": {

@@ -1,0 +1,26 @@
+import AppKit
+import SwiftpolisServices
+
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    func applicationDidFinishLaunching(_ notification: Notification) {
+        Task { await AppModel.shared.start() }
+        #if DEBUG
+        DebugAutomation.run()
+        #endif
+    }
+
+    /// With "hide window on close" on, closing the window leaves the app running in the menu bar.
+    func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
+        !AppModel.shared.preferences.hidesWindowOnClose
+    }
+
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard AppModel.shared.hasActiveDownloads else { return .terminateNow }
+        let alert = NSAlert()
+        alert.messageText = "A download or downloads are in progress."
+        alert.informativeText = "Stop them before closing the app!"
+        alert.alertStyle = .warning
+        alert.runModal()
+        return .terminateCancel
+    }
+}

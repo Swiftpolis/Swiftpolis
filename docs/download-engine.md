@@ -161,6 +161,9 @@ until a Download starts.
 ([ADR 0002](adr/0002-port-engine-to-urlsession.md)). It keeps the rules above and fixes D4, D6, D7,
 D12, D13, D14, D15, D16, D19, D20, D21, D22, D23, D24, D25, D26 and D27.
 
+Persepolis's `https` proxy type isn't offered, because it sends exactly what its `http` type does. An
+import should treat it as `http`.
+
 **Scheduling isn't here.** The engine has no clock. Start times, End times and status `scheduled`
 belong to the service that runs it, in step 4.
 

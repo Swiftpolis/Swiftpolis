@@ -57,7 +57,7 @@ each one: native Mac behaviour, without the Qt style settings.
 | `tray-icon` | `yes` | Show tray icon | Menu bar item |
 | `hide-window` | `yes` | Hide window on close | Keep |
 | `show-menubar` | `no` | Show menubar | Drop; Mac apps always have one |
-| `show-sidepanel` | `yes` | Show side panel | Keep |
+| `show-sidepanel` | `yes` | Show side panel | Drop; the window's own sidebar button does this and remembers it |
 | `startup` | `no` | Run at startup | Login item |
 | `awake` | `no` | Keep system awake | Keep |
 | `check-clipboard` | unset | Check clipboard for links | Keep, off by default; detect link-like content before reading |
@@ -70,6 +70,9 @@ each one: native Mac behaviour, without the Qt style settings.
 `column0` to `column7` and `column10` to `column12`, all `yes`: File Name, Status, Size,
 Downloaded, Percentage, Connections, Transfer Rate, Estimated Time Left, First Try Date,
 Last Try Date, Category.
+
+Swiftpolis has no tab for these. Right-clicking the table's header shows and hides columns, and the
+window remembers them.
 
 ## Shortcuts tab
 

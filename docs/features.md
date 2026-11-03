@@ -1,32 +1,36 @@
 # Feature inventory
 
-The parity checklist. Nothing here is implemented yet. "Mac change" marks a decided replacement
-of Persepolis's mechanism.
+The parity checklist. A tick means it's built and available in the app. Automated tests cover the rules
+behind these, but the windows themselves are checked by hand, so see the note in
+[roadmap.md](roadmap.md) for what has been clicked through. "Mac change" marks a decided replacement of
+Persepolis's mechanism.
 
 ## Adding downloads
 
-- [ ] Add Link window: link, name, folder, Connections, Start time, End time, Speed dial
-- [ ] Add options: proxy (`http`, `socks5`), HTTP auth, referer, user agent, headers, cookie file
-- [ ] Choose a Category, or create a Queue from the window
-- [ ] "Download later"
-- [ ] Warning when the same link was added before
+- [x] Add Link window: link, name, folder, Connections
+- [ ] Add Link window: Start time, End time (step 4)
+- [x] Add options: proxy (`http`, `socks5`), HTTP auth, referer, user agent, headers, cookie file
+- [x] Choose a Category
+- [ ] Create a Queue from the Add Link window (step 4)
+- [x] "Download later"
+- [x] Warning when the same link was added before
 - [ ] Drag and drop links onto the main window
 - [ ] Import links from a text file, one per line, into a Queue
 - [ ] Import links from the clipboard into a Queue
 - [ ] Clipboard monitoring ([D5](upstream-defects.md))
 - [ ] Batch window: per-link selection, select all, shared proxy, auth and folder options
-- [ ] Spider fills in name and size in the background
+- [x] Spider fills in name and size in the background
 
 ## Download control
 
-- [ ] Multi-Connection HTTP and HTTPS, up to 64
-- [ ] Pause, resume, stop with control-file resume
-- [ ] Stop all active Downloads
-- [ ] Retries, timeout, certificate option
-- [ ] Speed dial, live
-- [ ] Free-space check and "Insufficient disk space" notification
-- [ ] Automatic subfolders by file type
-- [ ] Unique file names on collision
+- [x] Multi-Connection HTTP and HTTPS, up to 64
+- [x] Pause, resume, stop with control-file resume
+- [x] Stop all active Downloads
+- [x] Retries, timeout, certificate option
+- [x] Speed dial, live
+- [x] Free-space check and "Insufficient disk space" notification
+- [x] Automatic subfolders by file type
+- [x] Unique file names on collision
 
 ## Queues and scheduling
 
@@ -44,17 +48,19 @@ Full rules in [queue-and-schedule.md](queue-and-schedule.md).
 
 ## Main window
 
-- [ ] Toolbar with actions that change by Category
-- [ ] Side panel with Category list and Queue options
-- [ ] Table with 11 toggleable columns and saved widths
-- [ ] Sort by name, size, status, first try date, last try date
-- [ ] Multi-select mode and context menu
-- [ ] Double-click to open the file
-- [ ] Open file, open folder, open default folder
-- [ ] Remove from list; delete files; clear list; move files to another folder
-- [ ] Properties window: edit a stopped Download's options
-- [ ] Progress window per Download: live labels, controls, Speed dial, After-download shutdown
-- [ ] After-download dialog: open file, open folder, "don't show again"
+- [x] Toolbar with actions that follow the selected Download's status
+- [x] Side panel with Category list
+- [ ] Side panel Queue options (step 4)
+- [x] Table with 11 toggleable columns and saved widths
+- [x] Sort by name, size, status, first try date, last try date
+- [x] Multiple selection and context menu
+- [x] Double-click to open the file
+- [x] Open file, open folder, open default folder
+- [x] Remove from list; delete files; clear list; move files to another folder
+- [x] Properties window: edit a stopped Download's options
+- [x] Progress window per Download: live labels, controls, Speed dial
+- [ ] Progress window: After-download shutdown (step 4)
+- [x] After-download dialog: open file, open folder, "don't show again"
 - [ ] Log window with copy and report actions
 - [ ] About, Help, Report Issue, new-version check
 
@@ -84,14 +90,15 @@ Details in [browser-integration.md](browser-integration.md).
 - [ ] **New:** Safari extension
 - [ ] Chrome family and Firefox native messaging, with the existing store extensions
 - [ ] Command-line arguments
-- [ ] Menu bar item replacing the tray icon, including start hidden
-- [ ] Open at login. Mac change: replaces a hand-written LaunchAgent
-- [ ] Keep system awake. Mac change: replaces moving the mouse pointer every 20 seconds
-- [ ] Notifications with sounds and volume. Mac change: bundled sounds
+- [x] Menu bar item replacing the tray icon
+- [ ] Start hidden in the menu bar
+- [x] Open at login. Mac change: replaces a hand-written LaunchAgent
+- [x] Keep system awake. Mac change: replaces moving the mouse pointer every 20 seconds
+- [x] Notifications with sounds and volume. Mac change: bundled sounds
 - [ ] Three rotating log files
 - [ ] 18 locales, including right-to-left
 - [ ] Editable shortcuts
-- [ ] Hide on close; refuse to quit while Downloads are active
+- [x] Hide on close; refuse to quit while Downloads are active
 - [ ] `--default` and `--clear` reset behaviours
 
 ## Not carried over

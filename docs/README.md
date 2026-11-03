@@ -10,8 +10,8 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
   (`Side_Projects/persepolis`)
 - **Parity rule:** same rules, with known defects fixed ([ADR 0001](adr/0001-parity-with-defects-fixed.md))
 - **Distribution:** Developer ID, unsandboxed, GPLv3 ([ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md))
-- **Status:** step 2 of 8 ([roadmap.md](roadmap.md)). The HTTP engine works and is tested, but the
-  app has no window to use it from yet.
+- **Status:** step 3 of 8 ([roadmap.md](roadmap.md)). Single Downloads work from the app. Queues,
+  schedules, browsers, video and torrents don't yet.
 
 ## Documentation index
 
