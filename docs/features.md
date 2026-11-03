@@ -17,7 +17,8 @@ Built on the same kit, with what iOS rules out listed in
 - [x] Files in the Files app, with preview, share and Show in Files
 - [x] Notifications when a Download or Queue finishes
 - [x] iPad: sidebar, keyboard shortcuts, drag and drop of links
-- [ ] Safari extension, or a share sheet extension
+- [x] Share extension: send a page, several links or selected text from any app to the Add Links sheet.
+  See [ADR 0011](adr/0011-ios-links-arrive-by-share-extension.md)
 - [ ] Choosing another folder
 
 ## Adding downloads

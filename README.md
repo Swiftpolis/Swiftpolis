@@ -26,6 +26,7 @@ The same app core, built around what iOS allows:
 
 - **Keeps going when you leave:** the system runs the downloads, even if the iPad is locked or the app is closed
 - **Whole lists at once:** paste them, press Start, and the files appear in the Files app
+- **Send links from any app:** share a page or selected text from Safari to Swiftpolis
 - **Queues:** with retries and a rough start time
 
 There's no Video Finder, speed limit, proxy or end time, and no multi-connection downloading. iOS doesn't allow
@@ -61,6 +62,7 @@ scheme for the Mac, or `SwiftpolisMobile` for iPhone and iPad, which doesn't nee
 | --- | --- |
 | `Swiftpolis/` | The Mac app: SwiftUI views and view models |
 | `SwiftpolisMobile/` | The iPhone and iPad app |
+| `ShareExtension/` | Sends links from other apps to the iPhone and iPad app |
 | [`SwiftpolisKit/`](https://github.com/OWNER/SwiftpolisKit) | The package with the engines, storage and rules, as a Git submodule |
 | `SafariExtension/` | The Safari extension |
 | `NativeHost/` | The helper that Chrome, Firefox and others talk to |

@@ -62,6 +62,19 @@ final class AddLinksViewModel {
         set { draft.options.loginPassword = newValue }
     }
 
+    var hasSharedLinks: Bool {
+        !model.sharedLinks.isEmpty
+    }
+
+    /// Goes after whatever's already here, so links shared while the sheet is open don't replace it. A link
+    /// shared twice before the app came to the front still only shows once.
+    func takeSharedLinks() {
+        var seen = Set(LinkText.links(in: text))
+        let shared = model.takeSharedLinks().filter { seen.insert($0).inserted }.joined(separator: "\n")
+        guard !shared.isEmpty else { return }
+        text = text.isEmpty ? shared : text + "\n" + shared
+    }
+
     func setSelected(_ isSelected: Bool, id: Int) {
         if let index = draft.items.firstIndex(where: { $0.id == id }) {
             draft.items[index].isSelected = isSelected

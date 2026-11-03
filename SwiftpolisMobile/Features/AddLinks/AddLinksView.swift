@@ -25,6 +25,7 @@ struct AddLinksView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar { toolbar }
             .task { await viewModel.load() }
+            .onChange(of: viewModel.hasSharedLinks, initial: true) { viewModel.takeSharedLinks() }
             .alert("New Queue", isPresented: $isNamingQueue) {
                 TextField("Name", text: $newQueueName)
                 Button("Create") {

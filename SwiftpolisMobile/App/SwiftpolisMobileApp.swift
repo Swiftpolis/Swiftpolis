@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftpolisBridge
 import SwiftpolisEngines
 import UIKit
 
@@ -20,7 +21,27 @@ final class MobileAppDelegate: NSObject, UIApplicationDelegate {
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         Task { await MobileModel.shared.start() }
+        listenForSharedLinks()
         return true
+    }
+
+    /// Coming to the front covers most sharing, but on iPad the app can already be on screen beside the
+    /// other app. Left in the background, links stay safely in the inbox until the app comes to the front.
+    private func listenForSharedLinks() {
+        CFNotificationCenterAddObserver(
+            CFNotificationCenterGetDarwinNotifyCenter(),
+            nil,
+            { _, _, _, _, _ in
+                Task { @MainActor in
+                    if UIApplication.shared.applicationState != .background {
+                        MobileModel.shared.checkInbox()
+                    }
+                }
+            },
+            BrowserInbox.wakeNotification as CFString,
+            nil,
+            .deliverImmediately
+        )
     }
 
     /// iOS suspends the app again once this is called, so saving and notifying get a moment first.

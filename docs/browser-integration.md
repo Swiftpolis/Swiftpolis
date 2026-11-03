@@ -80,7 +80,8 @@ the extension never sends that. See **Defect D8**.
 3. **The current handler is the Xcode template.** It echoes messages back.
 4. **`getBrowserApi()` treats Safari as Firefox**, because `browser` is defined. The rest of
    the script mixes `chrome.` and `BrowserNameSpace`, and needs checking under Safari.
-5. **The existing wrapper project also has iOS targets.** They are out of scope for now.
+5. **The existing wrapper project also has iOS targets.** They are out of scope for now. On iOS, links
+   come by a share extension instead ([ADR 0011](adr/0011-ios-links-arrive-by-share-extension.md)).
 6. **The user has to enable the extension** in Safari Settings, and grant website access. The
    app should guide them.
 

@@ -9,6 +9,7 @@ struct RootView: View {
     @State private var isShowingSettings = false
     @State private var isNamingQueue = false
     @State private var newQueueName = ""
+    @Environment(\.scenePhase) private var scenePhase
 
     init(model: MobileModel) {
         self.model = model
@@ -35,6 +36,13 @@ struct RootView: View {
         }
         .task(id: Reload(revision: model.listRevision, category: viewModel.categoryName)) {
             await viewModel.reload()
+        }
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            if phase == .active { model.checkInbox() }
+        }
+        .onChange(of: model.sharedLinks) { _, links in
+            // The list opens the Add Links sheet, and on iPhone it may be off screen.
+            if !links.isEmpty { compactColumn = .detail }
         }
         .sheet(isPresented: $isShowingSettings) {
             SettingsView(model: model)

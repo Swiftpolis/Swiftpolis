@@ -51,6 +51,10 @@ The tests can't cover what the system does with the app gone. To check that on a
 from a slow server, and end the app with `kill -9`. Don't swipe it away, as iOS takes that as the person quitting
 it, and cancels its downloads. The files should still arrive, and the app should wake by itself to collect them.
 
+The share extension builds along with the app, as `SwiftpolisShare`. To try it, open a page in Safari on the
+simulator and share it to Swiftpolis, then open the app. On a device, both targets need the App Group
+`group.com.amirabravesh.Swiftpolis` in their signing, which automatic signing should set up on the first build.
+
 ## Publish a release
 
 The update check reads the latest release on GitHub. Set `ProjectLinks.owner` in

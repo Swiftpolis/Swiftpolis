@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import SwiftpolisBridge
 import SwiftpolisDomain
 import SwiftpolisEngines
 import SwiftpolisPersistence
@@ -30,6 +31,8 @@ final class MobileModel {
     /// Goes up whenever a saved list changes, so anything showing one knows to reload it.
     private(set) var listRevision = 0
     private(set) var runningQueues: Set<String> = []
+    /// Links other apps shared, until an Add Links sheet takes them.
+    private(set) var sharedLinks: [String] = []
 
     var preferences: Preferences {
         didSet { preferencesStore.preferences = preferences }
@@ -138,6 +141,22 @@ final class MobileModel {
         case .error: notify("Download Failed", body: name)
         default: break
         }
+    }
+
+    // MARK: Links from other apps
+
+    func checkInbox() {
+        let links = BrowserInbox.shared?.drain().joined().map(\.url) ?? []
+        guard !links.isEmpty else { return }
+        sharedLinks += links
+        UNUserNotificationCenter.current().removeDeliveredNotifications(
+            withIdentifiers: [BrowserInbox.waitingNotificationID]
+        )
+    }
+
+    func takeSharedLinks() -> [String] {
+        defer { sharedLinks = [] }
+        return sharedLinks
     }
 
     // MARK: Telling the person

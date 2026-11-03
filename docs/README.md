@@ -33,7 +33,7 @@ within what [iOS allows](adr/0010-ios-downloads-belong-to-the-system.md).
 | [project-structure.md](project-structure.md) | Where the code is, file by file | Living |
 | [setup-and-build.md](setup-and-build.md) | Run the tests and the app; the project file format | Living |
 | [roadmap.md](roadmap.md) | Build order and the early checks in each step | Living |
-| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0010 | Living |
+| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0011 | Living |
 
 "From source" docs describe what Persepolis does, found by reading its code, and they
 are not a Swiftpolis design. Where one disagrees with

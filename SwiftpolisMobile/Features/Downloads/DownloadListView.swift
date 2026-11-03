@@ -11,7 +11,7 @@ struct DownloadListView: View {
     @Environment(\.editMode) private var editMode
     @Environment(\.openURL) private var openURL
 
-    /// A sheet to add links, already holding any that were pasted or dropped.
+    /// A sheet to add links, already holding any that were pasted or dropped. It takes shared links itself.
     private struct AddSheet: Identifiable {
         let id = UUID()
         let text: String
@@ -36,6 +36,9 @@ struct DownloadListView: View {
         .dropDestination(for: String.self) { texts, _ in
             addSheet = AddSheet(text: texts.joined(separator: "\n"))
             return true
+        }
+        .onChange(of: viewModel.model.sharedLinks, initial: true) { _, links in
+            if !links.isEmpty, addSheet == nil { addSheet = AddSheet(text: "") }
         }
         .sheet(item: $addSheet) { sheet in
             AddLinksView(model: viewModel.model, text: sheet.text, category: viewModel.categoryName)

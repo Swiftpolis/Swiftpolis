@@ -27,12 +27,14 @@ Helpers/                           The helpers' entitlements, and bin/, which fe
 SwiftpolisMobile/                  The iPhone and iPad app. See ADR 0010
 ├── App/                           Entry point, and what the app shares
 └── Features/                      Downloads, AddLinks, Settings
+ShareExtension/                    Sends links from other apps to the iOS app. See ADR 0011
 
 SwiftpolisKit/                     Local Swift package, in its own repository, as a Git submodule
 ├── Sources/
 │   ├── SwiftpolisBridge/          Shared with the helper and extension, so it stays small
 │   │   ├── BrowserMessage.swift       The browsers' messages and native messaging's framing
-│   │   └── BrowserInbox.swift         The shared folder of requests, and the wake-up link
+│   │   ├── BrowserInbox.swift         The shared folder of requests, and the wake-up link
+│   │   └── LinkText.swift             Picking links out of text
 │   ├── SwiftpolisDomain/          Plain types, with no storage or UI
 │   │   ├── GID.swift
 │   │   ├── DownloadStatus.swift

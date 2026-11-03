@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Observation
+import SwiftpolisBridge
 import SwiftpolisDomain
 import SwiftpolisEngines
 import SwiftpolisServices
