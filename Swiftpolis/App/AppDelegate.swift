@@ -63,7 +63,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// The Dock icon goes when the last window does, unless Preferences says to keep it.
     @objc private func updateDockIcon() {
         hasSeenWindow = hasSeenWindow || hasOpenWindows
-        guard hasSeenWindow else { return }
+        guard hasSeenWindow, !AppModel.shared.isPresentingWindow else { return }
         let shows = AppModel.shared.preferences.showsDockIcon(hasOpenWindows: hasOpenWindows)
         let policy: NSApplication.ActivationPolicy = shows ? .regular : .accessory
         if NSApp.activationPolicy() != policy { NSApp.setActivationPolicy(policy) }

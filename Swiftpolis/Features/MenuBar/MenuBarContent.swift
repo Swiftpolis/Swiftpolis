@@ -5,24 +5,20 @@ import SwiftpolisServices
 /// The menu bar item, which replaces Persepolis's system tray icon.
 struct MenuBarContent: View {
     let model: AppModel
-    @Environment(\.openWindow) private var openWindow
 
     var body: some View {
         Button("Add New Download Link") {
-            openWindow(id: WindowID.addLink)
-            NSApp.activate()
+            model.present(id: WindowID.addLink)
         }
         Button("Find Video Links...") {
-            openWindow(id: WindowID.videoFinder)
-            NSApp.activate()
+            model.present(id: WindowID.videoFinder)
         }
         Button("Stop All Active Downloads") {
             Task { await model.services?.coordinator.stopAll() }
         }
         Divider()
         Button("Show Main Window") {
-            openWindow(id: WindowID.main)
-            NSApp.activate()
+            model.present(id: WindowID.main)
         }
         Button("Exit") { NSApp.terminate(nil) }
     }

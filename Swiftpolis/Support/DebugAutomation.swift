@@ -25,6 +25,8 @@ import SwiftpolisServices
 ///   named by `SWIFTPOLIS_DEBUG_PASTE_WINDOW`. It reports which windows are open afterwards.
 /// - `SWIFTPOLIS_DEBUG_BATCH_START`: a Category for the batch window to add to and start, as its Add and
 ///   Start button does, once it has the names. A Queue of that name is created if there isn't one.
+/// - `SWIFTPOLIS_DEBUG_FRONT_CHECK`: when set, puts Finder in front and opens windows as a browser link and
+///   the menu bar item do, reporting after each whether the window came to the front.
 /// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
@@ -112,6 +114,7 @@ enum DebugAutomation {
                 try? await Task.sleep(for: .seconds(2))
                 report("with the option on")
             }
+            if environment["SWIFTPOLIS_DEBUG_FRONT_CHECK"] != nil { await checkWindowsComeToFront() }
             if let text = environment["SWIFTPOLIS_DEBUG_PASTE"], let id = environment["SWIFTPOLIS_DEBUG_PASTE_WINDOW"] {
                 await paste(text, intoWindow: id)
             }
@@ -141,6 +144,41 @@ enum DebugAutomation {
                 model.didStart(gid, isScheduled: false)
             }
         }
+    }
+
+    private static func checkWindowsComeToFront() async {
+        let model = AppModel.shared
+        func putFinderInFront() async {
+            NSRunningApplication.runningApplications(withBundleIdentifier: "com.apple.finder").first?.activate()
+            try? await Task.sleep(for: .seconds(1.5))
+        }
+        func report(_ moment: String) async {
+            try? await Task.sleep(for: .seconds(2))
+            let frontmost = NSWorkspace.shared.frontmostApplication?.localizedName ?? "?"
+            let top = NSApp.orderedWindows.first { $0.isVisible && $0.styleMask.contains(.titled) }?.title ?? "none"
+            print("\(moment): frontmost app \(frontmost), top window \(top), key window \(NSApp.keyWindow?.title ?? "none")")
+            fflush(stdout)
+        }
+        try? await Task.sleep(for: .seconds(2))
+        await putFinderInFront()
+        model.showAddLink(for: BrowserLink(url: "http://127.0.0.1:9/behind.mkv"))
+        await report("browser link, main window open")
+
+        for window in NSApp.windows where window.styleMask.contains(.titled) { window.close() }
+        try? await Task.sleep(for: .seconds(1))
+        await putFinderInFront()
+        model.showAddLink(for: BrowserLink(url: "http://127.0.0.1:9/hidden.mkv"))
+        await report("browser link, no windows open")
+
+        for window in NSApp.windows where window.styleMask.contains(.titled) { window.close() }
+        try? await Task.sleep(for: .seconds(1))
+        await putFinderInFront()
+        model.present(id: WindowID.main)
+        await report("Show Main Window, no windows open")
+
+        await putFinderInFront()
+        model.present(id: WindowID.main)
+        await report("Show Main Window, already open behind Finder")
     }
 
     /// Goes through the field editor's own paste, so the field treats the text as it would a real

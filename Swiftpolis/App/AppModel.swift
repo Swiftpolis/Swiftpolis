@@ -55,6 +55,8 @@ final class AppModel {
     @ObservationIgnored let secrets: any SecretStore
     @ObservationIgnored let helpers: HelperInstallation
     @ObservationIgnored var openWindowAction: OpenWindowAction?
+    /// A window is on its way, so having none open right now doesn't mean the Dock icon should go.
+    @ObservationIgnored private(set) var isPresentingWindow = false
 
     @ObservationIgnored private let preferencesStore: PreferencesStore
     @ObservationIgnored private let dataFolder: URL
@@ -221,22 +223,53 @@ final class AppModel {
     func showAddLink(for link: BrowserLink) {
         let key = UUID().uuidString
         waitingAddLinks[key] = link
-        openWindowAction?(id: WindowID.addLink, value: key)
-        NSApp.activate()
+        present(id: WindowID.addLink, value: key)
+    }
+
+    /// Opens a window the person just asked for, in front of whichever app they're in. `NSApp.activate()`
+    /// only asks, and the app in front can refuse, so this insists. Without a Dock icon the app can't
+    /// come forward at all, so the icon comes back first.
+    func present(id: String, value: String? = nil) {
+        isPresentingWindow = true
+        NSApp.setActivationPolicy(.regular)
+        NSApp.activate(ignoringOtherApps: true)
+        let visible = Set(NSApp.windows.filter(\.isVisible).map(ObjectIdentifier.init))
+        if let value {
+            openWindowAction?(id: id, value: value)
+        } else {
+            openWindowAction?(id: id)
+        }
+        Task {
+            let window = await windowAppearing(id: id, besides: visible)
+            NSApp.activate(ignoringOtherApps: true)
+            window?.makeKeyAndOrderFront(nil)
+            isPresentingWindow = false
+        }
+    }
+
+    /// SwiftUI opens a window a moment after it's asked to. If no new one shows up, it's the one that's
+    /// already open.
+    private func windowAppearing(id: String, besides visible: Set<ObjectIdentifier>) async -> NSWindow? {
+        func matching() -> [NSWindow] {
+            NSApp.windows.filter { $0.isVisible && $0.identifier?.rawValue.hasPrefix(id) == true }
+        }
+        for _ in 0..<10 {
+            if let new = matching().first(where: { !visible.contains(ObjectIdentifier($0)) }) { return new }
+            try? await Task.sleep(for: .milliseconds(50))
+        }
+        return matching().last
     }
 
     func showBatch(for links: [BrowserLink]) {
         let key = UUID().uuidString
         waitingBatches[key] = links
-        openWindowAction?(id: WindowID.batchAdd, value: key)
-        NSApp.activate()
+        present(id: WindowID.batchAdd, value: key)
     }
 
     func showVideoFinder(for link: BrowserLink) {
         let key = UUID().uuidString
         waitingVideoLinks[key] = link
-        openWindowAction?(id: WindowID.videoFinder, value: key)
-        NSApp.activate()
+        present(id: WindowID.videoFinder, value: key)
     }
 
     func waitingVideoLink(_ key: String) -> BrowserLink? { waitingVideoLinks[key] }
