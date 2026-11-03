@@ -10,8 +10,8 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
   (`Side_Projects/persepolis`)
 - **Parity rule:** same rules, with known defects fixed ([ADR 0001](adr/0001-parity-with-defects-fixed.md))
 - **Distribution:** Developer ID, unsandboxed, GPLv3 ([ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md))
-- **Status:** step 4 of 8 ([roadmap.md](roadmap.md)). Single Downloads, Queues and schedules work from
-  the app. Browsers, video and torrents don't yet.
+- **Status:** step 5 of 8 ([roadmap.md](roadmap.md)). Single Downloads, Queues, schedules and browser links
+  work. Video and torrents don't yet.
 
 ## Documentation index
 

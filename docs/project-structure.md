@@ -10,7 +10,7 @@ Swiftpolis/                        App target: SwiftUI only
 │   ├── AppModel.swift             Shared state; reacts to Downloads starting and finishing
 │   └── AppDependencies.swift      Knows where things are stored
 ├── Features/                      Each screen's View and ViewModel
-│   ├── MainWindow/  AddLink/  Progress/  Properties/
+│   ├── MainWindow/  AddLink/  BatchAdd/  Progress/  Properties/
 │   ├── AfterDownload/  Preferences/  MenuBar/
 │   └── Shared/DownloadOptionsForm.swift   The options Add Link and Properties share
 ├── Support/
@@ -20,8 +20,14 @@ Swiftpolis/                        App target: SwiftUI only
 │   └── DebugAutomation.swift      Debug builds only; see setup-and-build.md
 └── Resources/Sounds/              Persepolis's notification sounds
 
+NativeHost/                        The helper Chrome and Firefox start
+SafariExtension/                   Safari's handler, and the extension's scripts in Resources/
+
 SwiftpolisKit/                     Local Swift package
 ├── Sources/
+│   ├── SwiftpolisBridge/          Shared with the helper and extension, so it stays small
+│   │   ├── BrowserMessage.swift       The browsers' messages and native messaging's framing
+│   │   └── BrowserInbox.swift         The shared folder of requests, and the wake-up link
 │   ├── SwiftpolisDomain/          Plain types, with no storage or UI
 │   │   ├── GID.swift
 │   │   ├── DownloadStatus.swift
@@ -48,7 +54,7 @@ SwiftpolisKit/                     Local Swift package
 │   ├── SwiftpolisServices/
 │   │   ├── DownloadCoordinator.swift  Runs Downloads and Queues, and applies who-may-do-what rules
 │   │   ├── ScheduledDownload.swift    Adds a Start time and End time to any engine
-│   │   ├── DownloadDraft.swift        What Add Link and Properties edit
+│   │   ├── DownloadDraft.swift        What the add windows edit; browser routing; helper manifests
 │   │   ├── Preferences.swift          Preferences and where they're stored
 │   │   └── SecretStore.swift          Passwords, in the Keychain
 │   └── SwiftpolisTestSupport/
@@ -58,10 +64,12 @@ SwiftpolisKit/                     Local Swift package
 └── Tests/
     ├── SwiftpolisDomainTests/
     ├── SwiftpolisPersistenceTests/
+    ├── SwiftpolisBridgeTests/
     ├── SwiftpolisEnginesTests/
     └── SwiftpolisServicesTests/
 
-Swiftpolis.entitlements            Lets the app ask System Events to shut down
+Swiftpolis.entitlements            System Events, and the App Group
+Swiftpolis-Info.plist              The swiftpolis:// link
 tools/
 └── persepolis-characterization/   Runs real Persepolis against a test server
 docs/                              This documentation

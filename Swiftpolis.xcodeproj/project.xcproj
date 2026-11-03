@@ -18,11 +18,35 @@
   ],
   "files": [
     { "kind": "folder", "path": "Swiftpolis", "target-membership": [ "Swiftpolis" ] },
+    { "kind": "folder", "path": "NativeHost", "target-membership": [ "swiftpolis-native-host" ] },
+    {
+      "kind": "group",
+      "path": "SafariExtension",
+      "children": [
+        { "path": "SafariWebExtensionHandler.swift", "target-membership": [ "SwiftpolisSafari/compile-sources" ] },
+        { "path": "Info.plist" },
+        { "path": "SafariExtension.entitlements" },
+        {
+          "kind": "group",
+          "path": "Resources",
+          "children": [
+            { "path": "manifest.json", "target-membership": [ "SwiftpolisSafari/resources" ] },
+            { "path": "background.js", "target-membership": [ "SwiftpolisSafari/resources" ] },
+            { "path": "contentScripts", "target-membership": [ "SwiftpolisSafari/resources" ] },
+            { "path": "icons", "target-membership": [ "SwiftpolisSafari/resources" ] },
+            { "path": "popup", "target-membership": [ "SwiftpolisSafari/resources" ] },
+            { "path": "scripts", "target-membership": [ "SwiftpolisSafari/resources" ] },
+          ],
+        },
+      ],
+    },
     {
       "kind": "group",
       "name": "Products",
       "children": [
         { "path": "<PRODUCTS>/Swiftpolis.app", "id": "2E17325C309941ED00B995DB", "type": "wrapper.application", "index": false },
+        { "path": "<PRODUCTS>/SwiftpolisSafari.appex", "id": "2E17325C309941ED00B995DC", "type": "wrapper.app-extension", "index": false, "target-membership": [ { "build-phase": "Swiftpolis/copy/Embed Foundation Extensions", "header-preservation": "remove-on-copy" } ] },
+        { "path": "<PRODUCTS>/swiftpolis-native-host", "id": "2E17325C309941ED00B995DD", "type": "compiled.mach-o.executable", "index": false, "target-membership": [ { "build-phase": "Swiftpolis/copy/Embed Native Host" } ] },
       ],
     },
   ],
@@ -32,10 +56,24 @@
       "id": "2E17325B309941ED00B995DB",
       "product": "Products/Swiftpolis.app",
       "product-type": "application",
+      "dependencies": [
+        "SwiftpolisSafari",
+        "swiftpolis-native-host",
+      ],
       "build-phases": [
         "compile-sources",
         "frameworks",
         "resources",
+        {
+          "kind": "copy",
+          "name": "Embed Foundation Extensions",
+          "bundle-base-path": "plugins-directory",
+        },
+        {
+          "kind": "copy",
+          "name": "Embed Native Host",
+          "bundle-base-path": "executables-directory",
+        },
       ],
       "package-product-members": [
         {
@@ -49,6 +87,9 @@
           "build-phase": { "build-phase": "frameworks" },
         }, {
           "product-name": "SwiftpolisServices",
+          "build-phase": { "build-phase": "frameworks" },
+        }, {
+          "product-name": "SwiftpolisBridge",
           "build-phase": { "build-phase": "frameworks" },
         },
       ],
@@ -64,6 +105,7 @@
         "ENABLE_HARDENED_RUNTIME": "YES",
         "ENABLE_PREVIEWS": "YES",
         "GENERATE_INFOPLIST_FILE": "YES",
+        "INFOPLIST_FILE": "Swiftpolis-Info.plist",
         "INFOPLIST_KEY_NSAppleEventsUsageDescription": "Swiftpolis asks System Events to shut down your Mac when a queue or download you chose finishes.",
         "INFOPLIST_KEY_NSHumanReadableCopyright": "",
         "LD_RUNPATH_SEARCH_PATHS": [
@@ -78,6 +120,77 @@
         "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
         "SWIFT_DEFAULT_ACTOR_ISOLATION": "MainActor",
         "SWIFT_EMIT_LOC_STRINGS": "YES",
+        "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
+        "SWIFT_VERSION": "6.0",
+      },
+    },
+    {
+      "name": "SwiftpolisSafari",
+      "id": "2E17325B309941ED00B995DC",
+      "product": "id:2E17325C309941ED00B995DC",
+      "product-type": "app-extension",
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+        "resources",
+      ],
+      "package-product-members": [
+        {
+          "product-name": "SwiftpolisBridge",
+          "build-phase": { "build-phase": "frameworks" },
+        },
+      ],
+      "build-settings": {
+        "CODE_SIGN_ENTITLEMENTS": "SafariExtension/SafariExtension.entitlements",
+        "CODE_SIGN_STYLE": "Automatic",
+        "CURRENT_PROJECT_VERSION": "1",
+        "DEVELOPMENT_TEAM": "Y4JD236954",
+        "ENABLE_APP_SANDBOX": "YES",
+        "ENABLE_HARDENED_RUNTIME": "YES",
+        "GENERATE_INFOPLIST_FILE": "YES",
+        "INFOPLIST_FILE": "SafariExtension/Info.plist",
+        "INFOPLIST_KEY_CFBundleDisplayName": "Swiftpolis",
+        "INFOPLIST_KEY_NSHumanReadableCopyright": "",
+        "LD_RUNPATH_SEARCH_PATHS": [
+          "$(inherited)",
+          "@executable_path/../Frameworks",
+          "@executable_path/../../../../Frameworks",
+        ],
+        "MARKETING_VERSION": "1.0",
+        "OTHER_LDFLAGS": [
+          "-framework",
+          "SafariServices",
+        ],
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.amirabravesh.Swiftpolis.Extension",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+        "SKIP_INSTALL": "YES",
+        "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
+        "SWIFT_VERSION": "6.0",
+      },
+    },
+    {
+      "name": "swiftpolis-native-host",
+      "id": "2E17325B309941ED00B995DD",
+      "product": "id:2E17325C309941ED00B995DD",
+      "product-type": "tool",
+      "build-phases": [
+        "compile-sources",
+        "frameworks",
+      ],
+      "package-product-members": [
+        {
+          "product-name": "SwiftpolisBridge",
+          "build-phase": { "build-phase": "frameworks" },
+        },
+      ],
+      "build-settings": {
+        "CODE_SIGN_ENTITLEMENTS": "NativeHost/NativeHost.entitlements",
+        "CODE_SIGN_STYLE": "Automatic",
+        "DEVELOPMENT_TEAM": "Y4JD236954",
+        "ENABLE_HARDENED_RUNTIME": "YES",
+        "PRODUCT_BUNDLE_IDENTIFIER": "com.amirabravesh.Swiftpolis.NativeHost",
+        "PRODUCT_NAME": "$(TARGET_NAME)",
+        "SKIP_INSTALL": "YES",
         "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
         "SWIFT_VERSION": "6.0",
       },

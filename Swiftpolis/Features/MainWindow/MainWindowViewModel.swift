@@ -354,6 +354,27 @@ final class MainWindowViewModel {
         }
     }
 
+    // MARK: Adding links
+
+    /// Returns whether the drop held any links.
+    func addDropped(_ text: String) -> Bool {
+        guard !LinkText.links(in: text).isEmpty else { return false }
+        model.showWindow(forLinksIn: text)
+        return true
+    }
+
+    func importLinks(from file: URL) {
+        guard let text = try? String(contentsOf: file, encoding: .utf8) else {
+            model.notify("Operation was not successful.", body: file.lastPathComponent, sound: .fail)
+            return
+        }
+        model.showWindow(forLinksIn: text)
+    }
+
+    func importLinksFromClipboard() {
+        model.showWindow(forLinksIn: NSPasteboard.general.string(forType: .string) ?? "")
+    }
+
     func sort(by key: DownloadSortKey) {
         guard let coordinator = services?.coordinator else { return }
         let category = selectedCategoryName

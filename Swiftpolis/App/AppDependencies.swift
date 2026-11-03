@@ -1,4 +1,5 @@
 import Foundation
+import SwiftpolisBridge
 import SwiftpolisPersistence
 import SwiftpolisServices
 
@@ -8,6 +9,7 @@ nonisolated enum AppDependencies {
         let dataFolder: URL
         let preferences: PreferencesStore
         let secrets: any SecretStore
+        let inbox: BrowserInbox?
     }
 
     static func environment() -> Environment {
@@ -17,7 +19,8 @@ nonisolated enum AppDependencies {
         return Environment(
             dataFolder: URL.applicationSupportDirectory.appending(path: "Swiftpolis", directoryHint: .isDirectory),
             preferences: PreferencesStore(),
-            secrets: KeychainSecretStore()
+            secrets: KeychainSecretStore(),
+            inbox: BrowserInbox.shared
         )
     }
 

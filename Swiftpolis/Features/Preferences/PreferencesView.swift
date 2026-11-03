@@ -61,7 +61,7 @@ struct PreferencesView: View {
             Tab("Notifications", systemImage: "bell") { notificationsTab }
             Tab("Behaviour", systemImage: "gearshape") { behaviourTab }
         }
-        .frame(width: 520, height: 420)
+        .frame(width: 520, height: 460)
     }
 
     private var downloadTab: some View {
@@ -121,6 +121,8 @@ struct PreferencesView: View {
             Toggle("Show in the menu bar", isOn: $viewModel.preferences.showsMenuBarItem)
             Toggle("Keep running when the window closes", isOn: $viewModel.preferences.hidesWindowOnClose)
             Toggle("Keep the system awake while downloading", isOn: $viewModel.preferences.keepsSystemAwake)
+            Toggle("Start links from the browser straight away", isOn: $viewModel.preferences.startsBrowserRequestsImmediately)
+            Toggle("Check the clipboard for copied links", isOn: $viewModel.preferences.checksClipboard)
             Toggle(
                 "Open at login",
                 isOn: Binding(get: { viewModel.startsAtLogin }, set: { viewModel.setStartsAtLogin($0) })

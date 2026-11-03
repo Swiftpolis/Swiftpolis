@@ -14,7 +14,14 @@ checklist of features is in [features.md](features.md).
 | 7. Torrents | libtorrent wrapper, magnet and file flows, file selection; then seeding | A torrent downloads with selected files, then seeds when enabled |
 | 8. Release | Persepolis import, 18 languages, shortcuts, remaining windows, notarized DMG | Everything in features.md is ticked |
 
-**Current state:** steps 1 to 4 are built.
+**Current state:** steps 1 to 5 are built.
+
+**What step 5 has been through:** a message in the exact browser format went through the real helper, the
+shared folder and the wake-up link to the running app, and the test server received the cookies, user agent
+and referrer. The batch window and Add Link were seen filled in. Rules and message formats have tests, and the
+Safari capture tests run the real script. **No real browser has been used.** Safari needs someone to switch the
+extension on, and Chrome and Firefox aren't installed on this Mac. A wake-up was also seen launching the app when
+it wasn't running.
 
 **What step 4 has been through:** every Queue and schedule rule has a test against a fake clock, based
 on recordings of real Persepolis. A real Queue ran in the app in the right order, and the running and
@@ -40,8 +47,8 @@ These could change the plan, so they happen at the start of the step that depend
 | 2 | Done: SOCKS5 and authenticated proxies work |
 | 4 | **Still open:** shutting down through a system request from an unsandboxed app. It needs someone present, because it really shuts the Mac down |
 | 4 | Done: record real Persepolis's Queue Passes, order and clock times ([results](persepolis-observed.md#queues)) |
-| 5 | Confirm D8 by running the real native-messaging path |
-| 5 | The Safari handler can write to the App Group and open a `swiftpolis://` link |
-| 5 | Clipboard detection under macOS 27's privacy prompts |
+| 5 | Done: confirm D8 by running the real native-messaging path ([results](persepolis-observed.md#native-messaging)) |
+| 5 | **Still open:** the sandboxed Safari handler can write to the App Group and open a `swiftpolis://` link. The unsandboxed helper can |
+| 5 | **Still open:** clipboard detection under macOS 27's privacy prompts |
 | 6 | The PyInstaller-based `yt-dlp_macos` survives notarization, and can self-update from Application Support |
 | 7 | libtorrent and Boost build statically for arm64 |

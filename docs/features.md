@@ -14,11 +14,11 @@ Persepolis's mechanism.
 - [x] Create a Queue from the Add Link window
 - [x] "Download later"
 - [x] Warning when the same link was added before
-- [ ] Drag and drop links onto the main window
-- [ ] Import links from a text file, one per line, into a Queue
-- [ ] Import links from the clipboard into a Queue
-- [ ] Clipboard monitoring ([D5](upstream-defects.md))
-- [ ] Batch window: per-link selection, select all, shared proxy, auth and folder options
+- [x] Drag and drop links onto the main window
+- [x] Import links from a text file, one per line, into a Queue
+- [x] Import links from the clipboard into a Queue
+- [x] Clipboard monitoring ([D5](upstream-defects.md))
+- [x] Batch window: per-link selection, select all, shared proxy, auth and folder options
 - [x] Spider fills in name and size in the background
 
 ## Download control
@@ -87,8 +87,8 @@ In scope, because the baseline is `test`.
 
 Details in [browser-integration.md](browser-integration.md).
 
-- [ ] **New:** Safari extension
-- [ ] Chrome family and Firefox native messaging, with the existing store extensions
+- [x] **New:** Safari extension
+- [x] Chrome family and Firefox native messaging, with the existing store extensions
 - [ ] Command-line arguments
 - [x] Menu bar item replacing the tray icon
 - [ ] Start hidden in the menu bar

@@ -2,6 +2,7 @@ import AppKit
 import Foundation
 import Observation
 import SwiftUI
+import SwiftpolisBridge
 import SwiftpolisDomain
 import SwiftpolisEngines
 import SwiftpolisPersistence
@@ -13,6 +14,7 @@ enum WindowID {
     static let progress = "progress"
     static let properties = "properties"
     static let afterDownload = "after-download"
+    static let batchAdd = "batch-add"
 }
 
 /// What the whole app shares: the services, live progress and preferences.
@@ -54,6 +56,11 @@ final class AppModel {
     @ObservationIgnored private let dataFolder: URL
     @ObservationIgnored private let notifier = Notifier()
     @ObservationIgnored private var keepAwakeActivity: NSObjectProtocol?
+    @ObservationIgnored private let inbox: BrowserInbox?
+    /// Links waiting for a window to open and ask for them. Windows are given a key rather than the
+    /// links, so that cookies never become part of a window's saved state.
+    @ObservationIgnored private var waitingAddLinks: [String: BrowserLink] = [:]
+    @ObservationIgnored private var waitingBatches: [String: [BrowserLink]] = [:]
 
     private init() {
         let environment = AppDependencies.environment()
@@ -61,6 +68,7 @@ final class AppModel {
         preferences = environment.preferences.preferences
         secrets = environment.secrets
         dataFolder = environment.dataFolder
+        inbox = environment.inbox
     }
 
     var services: Services? {
@@ -90,7 +98,10 @@ final class AppModel {
             )
             state = .ready(Services(library: library, coordinator: coordinator))
             notifier.requestPermission()
+            installBrowserHelpers()
             Task { await listen(to: coordinator) }
+            Task { await watchClipboard() }
+            drainInbox()
         } catch {
             state = .failed(message: error.localizedDescription)
         }
@@ -113,6 +124,115 @@ final class AppModel {
                 handleQueueFinished(outcome)
             case .shuttingDown:
                 notify("Swiftpolis is shutting down", body: "your system in 20 seconds", sound: .warning)
+            }
+        }
+    }
+
+    // MARK: Links from elsewhere
+
+    private func installBrowserHelpers() {
+        #if DEBUG
+        // A Debug build's helper lives in a build folder that comes and goes, and pointing browsers
+        // at it would take them away from whatever they use now, so this has to be asked for.
+        guard ProcessInfo.processInfo.environment["SWIFTPOLIS_INSTALL_BROWSER_HELPERS"] != nil else { return }
+        #endif
+        let helper = Bundle.main.bundleURL.appending(path: "Contents/MacOS/swiftpolis-native-host")
+        NativeHostManifests.install(
+            helperPath: helper.path,
+            home: FileManager.default.homeDirectoryForCurrentUser
+        )
+    }
+
+    /// Picks up what browsers have left. Does nothing until there's a window action to show them
+    /// with, and is called again when there is.
+    func drainInbox() {
+        guard services != nil, openWindowAction != nil, let inbox else { return }
+        for links in inbox.drain() {
+            handle(links)
+        }
+    }
+
+    private func handle(_ links: [BrowserLink]) {
+        switch BrowserRequestRoute(links: links, startsImmediately: preferences.startsBrowserRequestsImmediately) {
+        case .addLink(let link):
+            showAddLink(for: link)
+        case .startNow(let link):
+            startNow(link)
+        case .batch(let links):
+            showBatch(for: links)
+        case nil:
+            break
+        }
+    }
+
+    func showAddLink(for link: BrowserLink) {
+        let key = UUID().uuidString
+        waitingAddLinks[key] = link
+        openWindowAction?(id: WindowID.addLink, value: key)
+        NSApp.activate()
+    }
+
+    func showBatch(for links: [BrowserLink]) {
+        let key = UUID().uuidString
+        waitingBatches[key] = links
+        openWindowAction?(id: WindowID.batchAdd, value: key)
+        NSApp.activate()
+    }
+
+    func waitingAddLink(_ key: String) -> BrowserLink? { waitingAddLinks[key] }
+    func waitingBatch(_ key: String) -> [BrowserLink]? { waitingBatches[key] }
+
+    func forgetWaitingLinks(_ key: String) {
+        waitingAddLinks[key] = nil
+        waitingBatches[key] = nil
+    }
+
+    private func startNow(_ link: BrowserLink) {
+        guard let coordinator = services?.coordinator else { return }
+        let draft = DownloadDraft(preferences: preferences, browserLink: link)
+        Task {
+            do {
+                let gid = try await coordinator.add(
+                    draft.request,
+                    secrets: draft.secrets,
+                    to: CategoryKind.singleDownloadsName,
+                    startNow: true
+                )
+                didStart(gid, isScheduled: false)
+            } catch {
+                notify("Operation was not successful.", body: error.localizedDescription, sound: .fail)
+            }
+        }
+    }
+
+    /// Opens the right window for some links, typed or read from a file or the clipboard.
+    func showWindow(forLinksIn text: String) {
+        let links = LinkText.links(in: text).map { BrowserLink(url: $0) }
+        switch links.count {
+        case 0: break
+        case 1: showAddLink(for: links[0])
+        default: showBatch(for: links)
+        }
+    }
+
+    /// Persepolis's clipboard monitoring, which never fired there (D5). The pasteboard's change count
+    /// needs no permission. Looking for a link pattern before reading means the clipboard is only
+    /// read, and macOS only asks, when there's a link to act on.
+    private func watchClipboard() async {
+        #if DEBUG
+        if DebugAutomation.isActive { return }
+        #endif
+        let pasteboard = NSPasteboard.general
+        var lastChange = pasteboard.changeCount
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(1))
+            guard pasteboard.changeCount != lastChange else { continue }
+            lastChange = pasteboard.changeCount
+            guard preferences.checksClipboard else { continue }
+
+            let patterns = try? await pasteboard.detectedPatterns(for: [\.probableWebURL])
+            if patterns?.contains(\.probableWebURL) == true, let text = pasteboard.string(forType: .string) {
+                showWindow(forLinksIn: text)
             }
         }
     }

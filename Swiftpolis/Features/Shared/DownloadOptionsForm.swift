@@ -13,7 +13,6 @@ struct DownloadOptionsForm<General: View>: View {
 
     @State private var isChoosingFolder = false
     @State private var isChoosingCookies = false
-    @State private var proxyMessage = ""
     @State private var isNamingQueue = false
     @State private var newQueueName = "queue"
 
@@ -81,51 +80,13 @@ struct DownloadOptionsForm<General: View>: View {
     }
 
     private var proxyTab: some View {
-        Form {
-            Toggle("Use a proxy", isOn: $draft.usesProxy)
-            Group {
-                Picker("Type", selection: $draft.proxyKind) {
-                    Text("HTTP").tag(ProxySettings.Kind.http)
-                    Text("SOCKS5").tag(ProxySettings.Kind.socks5)
-                }
-                TextField("Host", text: $draft.proxyHost)
-                TextField("Port", value: $draft.proxyPort, format: .number.grouping(.never))
-                TextField("Username", text: $draft.proxyUser)
-                SecureField("Password", text: $draft.proxyPassword)
-            }
-            .disabled(!draft.usesProxy)
-            LabeledContent("System proxy") {
-                HStack {
-                    Text(proxyMessage).foregroundStyle(.secondary)
-                    Button("Detect", action: detectProxy)
-                }
-            }
-        }
-        .formStyle(.grouped)
-    }
-
-    private func detectProxy() {
-        if let proxy = SystemProxy.detect() {
-            draft.proxyHost = proxy.host
-            draft.proxyPort = proxy.port
-            draft.usesProxy = true
-            proxyMessage = ""
-        } else {
-            draft.usesProxy = false
-            proxyMessage = "No proxy detected!"
-        }
+        Form { ProxyFields(draft: $draft) }
+            .formStyle(.grouped)
     }
 
     private var advancedTab: some View {
         Form {
-            Section("Login") {
-                Toggle("This site needs a login", isOn: $draft.usesLogin)
-                Group {
-                    TextField("Username", text: $draft.loginUser)
-                    SecureField("Password", text: $draft.loginPassword)
-                }
-                .disabled(!draft.usesLogin)
-            }
+            LoginFields(draft: $draft)
             Section("Request") {
                 TextField("Referrer", text: $draft.referer)
                 TextField("User agent", text: $draft.userAgent)
@@ -147,6 +108,62 @@ struct DownloadOptionsForm<General: View>: View {
         .formStyle(.grouped)
         .fileImporter(isPresented: $isChoosingCookies, allowedContentTypes: [.item]) { result in
             if case .success(let file) = result { draft.cookieFilePath = file.path }
+        }
+    }
+}
+
+/// The proxy options, shared by every window that adds Downloads.
+struct ProxyFields: View {
+    @Binding var draft: DownloadDraft
+    @State private var message = ""
+
+    var body: some View {
+        Section("Proxy") {
+            Toggle("Use a proxy", isOn: $draft.usesProxy)
+            Group {
+                Picker("Type", selection: $draft.proxyKind) {
+                    Text("HTTP").tag(ProxySettings.Kind.http)
+                    Text("SOCKS5").tag(ProxySettings.Kind.socks5)
+                }
+                TextField("Host", text: $draft.proxyHost)
+                TextField("Port", value: $draft.proxyPort, format: .number.grouping(.never))
+                TextField("Username", text: $draft.proxyUser)
+                SecureField("Password", text: $draft.proxyPassword)
+            }
+            .disabled(!draft.usesProxy)
+            LabeledContent("System proxy") {
+                HStack {
+                    Text(message).foregroundStyle(.secondary)
+                    Button("Detect", action: detect)
+                }
+            }
+        }
+    }
+
+    private func detect() {
+        if let proxy = SystemProxy.detect() {
+            draft.proxyHost = proxy.host
+            draft.proxyPort = proxy.port
+            draft.usesProxy = true
+            message = ""
+        } else {
+            draft.usesProxy = false
+            message = "No proxy detected!"
+        }
+    }
+}
+
+struct LoginFields: View {
+    @Binding var draft: DownloadDraft
+
+    var body: some View {
+        Section("Login") {
+            Toggle("This site needs a login", isOn: $draft.usesLogin)
+            Group {
+                TextField("Username", text: $draft.loginUser)
+                SecureField("Password", text: $draft.loginPassword)
+            }
+            .disabled(!draft.usesLogin)
         }
     }
 }

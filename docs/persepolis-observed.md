@@ -83,7 +83,8 @@ All are in [upstream-defects.md](upstream-defects.md).
 | D15 | Mixed-case archive extensions can't match | **Mostly wrong.** `old.Z` did reach `Compressed`, because lowercase `z` is also listed. Only `.f` is affected |
 | D16 | One-character names crash on collision | **Confirmed.** `IndexError`, and the file stays outside its subfolder |
 
-D2 and D9 are confirmed under [Queues](#queues). D8 waits for step 5. D3 and D5 are UI wiring.
+D2 and D9 are confirmed under [Queues](#queues), and D8 under [Native messaging](#native-messaging). D3
+and D5 are UI wiring.
 
 ## Other details
 
@@ -126,6 +127,15 @@ Files were added `a`, then `b`, then `c`, each on one Connection.
 - From reading `queue.py`: an End-time stop leaves `start` set, so a requested shutdown still happens.
 
 The real shutdown wasn't run, because `shutDown()` needs a root password and would turn the Mac off.
+
+## Native messaging
+
+From [`observe_native_host.py`](../tools/persepolis-characterization/observe_native_host.py), which sends
+the real program the exact message its extension sends.
+
+**D8 confirmed.** The extension sent `"cookies": "session=abc123; theme=dark"`, and what Persepolis stored
+for the Add Link window has `load_cookies: null`, with no cookies anywhere. The URL, referrer and user agent
+all came through. The reply was `{"enable": true, "version": "1.85"}`.
 
 ## Early checks for the Swift engine
 

@@ -29,7 +29,11 @@ struct MainWindowView: View {
             }
         }
         .frame(minWidth: 900, minHeight: 450)
-        .onAppear { model.openWindowAction = openWindow }
+        .onAppear {
+            model.openWindowAction = openWindow
+            model.drainInbox()
+        }
+        .onChange(of: model.services != nil) { model.drainInbox() }
         .task(id: ReloadTrigger(revision: model.listRevision, category: viewModel.selectedCategoryName, isReady: model.services != nil)) {
             await viewModel.reload()
         }
@@ -48,6 +52,7 @@ private struct DownloadsSplitView: View {
     @State private var isConfirmingDelete = false
     @State private var isConfirmingClear = false
     @State private var isChoosingMoveFolder = false
+    @State private var isChoosingTextFile = false
     @State private var isNamingQueue = false
     @State private var newQueueName = "queue"
     @State private var isConfirmingRemoveQueue = false
@@ -133,6 +138,12 @@ private struct DownloadsSplitView: View {
             contextMenuItems
         } primaryAction: { _ in
             viewModel.openFile()
+        }
+        .dropDestination(for: URL.self) { urls, _ in
+            viewModel.addDropped(urls.map(\.absoluteString).joined(separator: "\n"))
+        }
+        .fileImporter(isPresented: $isChoosingTextFile, allowedContentTypes: [.plainText, .text]) { result in
+            if case .success(let file) = result { viewModel.importLinks(from: file) }
         }
     }
 
@@ -243,6 +254,9 @@ private struct DownloadsSplitView: View {
                     Button("First Try Date") { viewModel.sort(by: .firstTry) }
                     Button("Last Try Date") { viewModel.sort(by: .lastTry) }
                 }
+                Button("Import Links from Text File...") { isChoosingTextFile = true }
+                Button("Import Links from Clipboard...") { viewModel.importLinksFromClipboard() }
+                Divider()
                 Button("Open Default Download Folder") { viewModel.openDefaultFolder() }
                 Button("Stop All Active Downloads") { viewModel.stopAll() }
                 Divider()

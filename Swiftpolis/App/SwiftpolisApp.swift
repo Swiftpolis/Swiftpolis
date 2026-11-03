@@ -13,9 +13,19 @@ struct SwiftpolisApp: App {
         }
         .commands { AppCommands(model: model) }
 
-        WindowGroup("Add New Download Link", id: WindowID.addLink) {
+        WindowGroup("Add New Download Link", id: WindowID.addLink, for: String.self) { $key in
             if let services = model.services {
-                AddLinkView(model: model, services: services)
+                AddLinkView(model: model, services: services, waitingKey: key)
+            }
+        }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(.suppressed)
+        .restorationBehavior(.disabled)
+
+        WindowGroup("Add Links", id: WindowID.batchAdd, for: String.self) { $key in
+            if let services = model.services, let key, let links = model.waitingBatch(key) {
+                BatchAddView(model: model, services: services, links: links)
+                    .onDisappear { model.forgetWaitingLinks(key) }
             }
         }
         .windowResizability(.contentSize)

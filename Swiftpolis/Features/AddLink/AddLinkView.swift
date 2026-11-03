@@ -5,8 +5,14 @@ struct AddLinkView: View {
     @State private var viewModel: AddLinkViewModel
     @Environment(\.dismissWindow) private var dismissWindow
 
-    init(model: AppModel, services: AppModel.Services) {
-        _viewModel = State(initialValue: AddLinkViewModel(model: model, services: services))
+    private let model: AppModel
+    private let waitingKey: String?
+
+    init(model: AppModel, services: AppModel.Services, waitingKey: String?) {
+        self.model = model
+        self.waitingKey = waitingKey
+        let link = waitingKey.flatMap(model.waitingAddLink)
+        _viewModel = State(initialValue: AddLinkViewModel(model: model, services: services, browserLink: link))
     }
 
     var body: some View {
@@ -36,6 +42,9 @@ struct AddLinkView: View {
         }
         .frame(width: 560, height: 480)
         .task { await viewModel.load() }
+        .onDisappear {
+            if let waitingKey { model.forgetWaitingLinks(waitingKey) }
+        }
         .alert("This link has been added before! Are you sure you want to add it again?", isPresented: $viewModel.isAskingAboutDuplicate) {
             Button("Yes") {
                 Task { if await viewModel.addDespiteDuplicate() { close() } }

@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Observation
+import SwiftpolisBridge
 import SwiftpolisDomain
 import SwiftpolisEngines
 import SwiftpolisServices
@@ -24,12 +25,14 @@ final class AddLinkViewModel {
     private var pendingStart = false
     private static let defaults = UserDefaults.standard
 
-    init(model: AppModel, services: AppModel.Services) {
+    init(model: AppModel, services: AppModel.Services, browserLink: BrowserLink?) {
         self.model = model
         self.services = services
-        var draft = DownloadDraft(preferences: model.preferences)
+        var draft = browserLink.map { DownloadDraft(preferences: model.preferences, browserLink: $0) }
+            ?? DownloadDraft(preferences: model.preferences)
         Self.restoreRememberedOptions(into: &draft)
         self.draft = draft
+        lookUpLink()
     }
 
     func load() async {

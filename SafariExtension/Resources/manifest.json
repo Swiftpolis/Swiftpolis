@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "Swiftpolis",
+  "short_name": "Swiftpolis",
+  "description": "Sends file links and downloads from Safari to Swiftpolis.",
+  "version": "1.0.0",
+  "icons": {
+    "32": "icons/icon_32.png",
+    "48": "icons/icon_48.png",
+    "128": "icons/icon_128.png"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Swiftpolis",
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "32": "icons/icon_32.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": [
+        "contentScripts/capture.js",
+        "contentScripts/content.js"
+      ],
+      "css": [
+        "contentScripts/modal.css"
+      ],
+      "matches": [
+        "https://*/*",
+        "http://*/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "permissions": [
+    "nativeMessaging",
+    "contextMenus",
+    "cookies",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "*://*/*"
+  ]
+}

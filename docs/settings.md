@@ -62,7 +62,7 @@ each one: native Mac behaviour, without the Qt style settings.
 | `awake` | `no` | Keep system awake | Keep |
 | `check-clipboard` | unset | Check clipboard for links | Keep, off by default; detect link-like content before reading |
 | `dont-show-addlinkwindow` | unset | Start browser requests immediately | Keep |
-| `browser-persepolis` | `yes` | Browser integration | Keep |
+| `browser-persepolis` | `yes` | Browser integration | Drop; the helpers are always installed |
 | `video_finder/max_links` | 3 | Max Video Finder windows per request | Keep |
 
 ## Columns tab

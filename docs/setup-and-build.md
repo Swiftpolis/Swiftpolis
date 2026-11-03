@@ -36,6 +36,12 @@ The Queue scenarios work the same way, and wait for real minutes, so they take s
 HOME=$(mktemp -d) PYTHONPATH=<persepolis>:tools/persepolis-characterization <persepolis>/venv/bin/python tools/persepolis-characterization/observe_queue.py
 ```
 
+The native-messaging check makes its own temporary home:
+
+```bash
+PYTHONPATH=<persepolis> <persepolis>/venv/bin/python tools/persepolis-characterization/observe_native_host.py
+```
+
 [persepolis-observed.md](persepolis-observed.md) records what the results meant.
 
 ## Run the app
@@ -48,6 +54,26 @@ xcodebuild -project Swiftpolis.xcodeproj -scheme Swiftpolis -configuration Debug
 
 The app keeps its data in `~/Library/Application Support/Swiftpolis/`.
 
+## Testing browsers
+
+**Safari:** run the app from Xcode. In Safari, turn on Settings > Advanced > Show features for web developers,
+then Settings > Developer > Allow unsigned extensions, which resets when Safari quits. Then enable Swiftpolis
+under Settings > Extensions and allow it on websites.
+
+**The helper, without a browser:** `tools/send-native-message.py` sends the helper the same bytes a browser
+would. Replace `<app>` with the built app's path:
+
+```bash
+python3 tools/send-native-message.py https://example.com/a.zip | <app>/Contents/MacOS/swiftpolis-native-host
+```
+
+macOS doesn't accept `swiftpolis://` from apps in temporary folders, so a build in `/tmp` can't be woken.
+
+**Chrome and Firefox's manifests:** Debug builds don't install these unless `SWIFTPOLIS_INSTALL_BROWSER_HELPERS`
+is set, because that would take those browsers away from Persepolis and point them at a build folder. Release
+builds always install them. If a test wake-up arrives when the app isn't running, macOS launches the app without
+any debug settings, so close it again afterwards.
+
 ## Project file
 
 `Swiftpolis.xcodeproj/project.xcproj` is Xcode 27's plain-text project format, not a `.pbxproj`.
@@ -55,6 +81,8 @@ The app keeps its data in `~/Library/Application Support/Swiftpolis/`.
 - **App sources:** anything in the `Swiftpolis/` folder is compiled automatically, so new files need
   no project edit.
 - **Package products:** listed under the target's `package-product-members`.
+- **Embedding:** the extension and helper are `target-membership` entries on their product, naming a `copy`
+  build phase.
 - **Converting:** `xcodebuild -convert-project "Xcode 26.3"` produces a classic `.pbxproj`, and
   `"Xcode Project"` converts back.
 

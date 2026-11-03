@@ -87,16 +87,53 @@ the extension never sends that. See **Defect D8**.
 Sources: [MDN browser-compat-data](https://github.com/mdn/browser-compat-data/blob/main/webextensions/api/downloads.json),
 [Apple: assessing browser compatibility](https://developer.apple.com/tutorials/data/documentation/safariservices/assessing-your-safari-web-extension-s-browser-compatibility.md).
 
-## Swiftpolis decisions
+## How Swiftpolis does it
 
-- **Extension code** is forked into this repo, renamed to Swiftpolis, and macOS only
-  ([Q23](open-questions.md)).
-- **Chrome and Firefox** keep using the existing store extensions, through a bundled helper that
-  speaks the same message format. Persepolis and Swiftpolis share the native host name
-  `com.persepolis.pdmchromewrapper`, so if both are installed, whichever launched last receives
-  those browsers' requests.
-- **Cookies** are stored in the Keychain per Download and removed when it finishes or is removed
-  ([Q21](open-questions.md)). This also fixes Defect D8.
+```
+Safari extension ─ sendNativeMessage ─▶ SafariWebExtensionHandler ─┐
+                                                                   ├─▶ one file per request ─▶ swiftpolis://inbox
+Chrome, Firefox ─ native messaging ──▶ swiftpolis-native-host ─────┘   in the App Group         wakes the app
+                                                                                                     │
+                     Add Link, batch window, or an immediate start ◀── AppModel drains the inbox ◀───┘
+```
+
+([ADR 0007](adr/0007-browser-requests-via-shared-inbox.md))
+
+- **The link carries no data,** so a web page opening `swiftpolis://inbox` can only cause an empty check.
+- **Requests are private and short-lived.** Files are readable only by the user, and a request over 24 hours
+  old is thrown away unread, so a forgotten link can't pop up days later.
+- **Cookies** are stored in the Keychain per Download. They go on HEAD and GET, are dropped on a redirect to
+  another host, and are deleted when the Download completes. A stopped Download keeps them, to resume
+  ([Q21](open-questions.md)). This fixes Defect D8.
+- **Windows get a key, not the links,** so cookies never become part of a window's saved state.
+- **Chrome and Firefox** use the existing store extensions, through the helper in the app's
+  `Contents/MacOS`. Release builds write manifests at launch, for browsers whose support folder exists.
+  Persepolis creates those folders whether or not the browser is installed, so this can't be relied on to mean
+  the browser is there. Persepolis and Swiftpolis share the native host name `com.persepolis.pdmchromewrapper`, so if both are installed, whichever launched
+  last receives those browsers' requests.
+- **The Safari extension** is forked into `SafariExtension/`, renamed, and macOS only
+  ([Q23](open-questions.md)). Its `background.js` and `content.js` were rewritten for Safari.
+
+### Safari click capture
+
+`capture.js` catches a plain left click on a link when catching is on, the link is `http` or `https`, no
+excluded keyword matches, and either the link has a `download` attribute or its path ends in a known archive,
+installer, video, audio or torrent extension. PDFs and images are left alone, because browsers show them. It
+can't catch downloads started by scripts or redirects
+([ADR 0006](adr/0006-safari-capture-is-best-effort.md)).
+
+### Differences from the Persepolis extension
+
+- The size check (skip under 5 MiB) needs the `downloads` API, so it's gone on Safari.
+- Cookie names and values are sent as they are. The original re-encoded them, except on one site where that
+  broke them.
+- It no longer tries to work out a domain from a list of top-level domains, which its own comments call
+  useless.
+
+### Not done yet
+
+- Links from Video Finder sites are treated as ordinary links until step 6.
+- The `browser-persepolis` preference isn't carried over: the helpers are always installed.
 
 ## Other entry points
 

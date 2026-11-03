@@ -2,6 +2,7 @@
 import AppKit
 import Foundation
 import SwiftUI
+import SwiftpolisBridge
 import SwiftpolisDomain
 import SwiftpolisServices
 
@@ -12,6 +13,8 @@ import SwiftpolisServices
 /// - `SWIFTPOLIS_DEBUG_SNAPSHOTS`: a folder to write each window to, as PNGs, once a second.
 /// - `SWIFTPOLIS_DEBUG_ADD`: a link to add and start once the app is ready.
 /// - `SWIFTPOLIS_DEBUG_OPEN`: window IDs to open, separated by commas.
+/// - `SWIFTPOLIS_DEBUG_IMMEDIATE`: when set, links from browsers start straight away.
+/// - `SWIFTPOLIS_DEBUG_SHARED_INBOX`: when set, reads the real shared inbox instead of a throwaway one.
 /// - `SWIFTPOLIS_DEBUG_QUEUE`: links to add to Scheduled Downloads, separated by commas, before starting
 ///   it and showing it in the main window.
 enum DebugAutomation {
@@ -31,11 +34,15 @@ enum DebugAutomation {
         let store = PreferencesStore(defaults: defaults)
         var preferences = Preferences()
         preferences.downloadFolder = data + "/Downloads"
+        preferences.startsBrowserRequestsImmediately = ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_IMMEDIATE"] != nil
         store.preferences = preferences
         return AppDependencies.Environment(
             dataFolder: URL(filePath: data, directoryHint: .isDirectory),
             preferences: store,
-            secrets: InMemorySecretStore()
+            secrets: InMemorySecretStore(),
+            inbox: ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_SHARED_INBOX"] != nil
+                ? BrowserInbox.shared
+                : BrowserInbox(folder: URL(filePath: data + "/Inbox", directoryHint: .isDirectory))
         )
     }
 
