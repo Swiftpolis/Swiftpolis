@@ -21,7 +21,7 @@ Swiftpolis/                        App target: SwiftUI only
 └── Resources/Sounds/              Persepolis's notification sounds
 
 NativeHost/                        The helper Chrome and Firefox start
-SafariExtension/                   Safari's handler, and the extension's scripts in Resources/
+SafariExtension/                   Built for Mac and iOS. Safari's handler, and the extension's scripts in Resources/
 Helpers/                           The helpers' entitlements, and bin/, which fetch-helpers.sh fills
 
 SwiftpolisMobile/                  The iPhone and iPad app. See ADR 0010

@@ -2,7 +2,7 @@
 
 A native download manager for macOS, iPhone and iPad, written in Swift and SwiftUI. It's a rewrite of
 [Persepolis Download Manager](https://github.com/persepolisdm/persepolis) that keeps its queues and
-schedules, and adds a Safari extension on the Mac.
+schedules, and adds a Safari extension.
 
 > **Early days.** There's no notarized release yet, so for now you build it yourself. Torrents, translations
 > and importing from Persepolis aren't done. See [what's left](docs/roadmap.md).
@@ -27,6 +27,7 @@ The same app core, built around what iOS allows:
 - **Keeps going when you leave:** the system runs the downloads, even if the iPad is locked or the app is closed
 - **Whole lists at once:** paste them, press Start, and the files appear in the Files app
 - **Send links from any app:** share a page or selected text from Safari to Swiftpolis
+- **Safari extension:** tap a file link, or pick from all the links on a page
 - **Queues:** with retries and a rough start time
 
 There's no Video Finder, speed limit, proxy or end time, and no multi-connection downloading. iOS doesn't allow

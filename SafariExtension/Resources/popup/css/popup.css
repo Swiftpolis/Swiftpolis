@@ -278,23 +278,27 @@ kbd {
     text-align: center;
 }
 
-/* An iPhone or iPad shows the popup as a sheet, with no keyboard to speak of and no hover. */
-@media (hover: none) {
-    body {
-        width: 100%;
-        font-size: 15px;
-    }
+/* An iPhone or iPad. Safari sizes its popover to the page, so a plain 100% can come out far too narrow. */
+.is-touch body {
+    width: 100%;
+    min-width: 320px;
+    font-size: 15px;
+}
 
-    .action:hover {
-        background: var(--card);
-        color: var(--ink);
-    }
+.is-touch .action {
+    min-height: 46px;
+}
 
-    .action {
-        min-height: 46px;
-    }
+.is-touch .action:hover {
+    background: var(--card);
+    color: var(--ink);
+}
 
-    .shortcuts {
-        display: none;
-    }
+.is-touch #context-menu-setting,
+.is-touch .shortcuts {
+    display: none;
+}
+
+.is-touch .setting + .setting {
+    border-top: 0;
 }

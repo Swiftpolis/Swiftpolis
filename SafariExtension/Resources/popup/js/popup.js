@@ -19,6 +19,10 @@
 
 const api = typeof browser !== "undefined" ? browser : chrome;
 
+// An iPad can describe itself as a Mac, but no Mac has a touch screen. These have no right-click menu to add
+// to, and no use for keyboard shortcuts.
+document.documentElement.classList.toggle("is-touch", navigator.maxTouchPoints > 1);
+
 const catchesLinks = document.getElementById("catches-links");
 const contextMenu = document.getElementById("context-menu");
 const keywords = document.getElementById("keywords");
@@ -59,9 +63,6 @@ api.runtime.sendMessage({ type: "getExtensionConfig" }).then((config) => {
     contextMenu.addEventListener("change", save);
     keywords.addEventListener("input", save);
 });
-
-// Safari on iPhone and iPad has no right-click menu to add to.
-if (!api.contextMenus) document.getElementById("context-menu-setting").hidden = true;
 
 document.getElementById("all-links").addEventListener("click", () => pickLinks("scripts/getall.js"));
 document.getElementById("selected-links").addEventListener("click", () => pickLinks("scripts/getselected.js"));

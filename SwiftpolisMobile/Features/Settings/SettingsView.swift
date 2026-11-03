@@ -23,6 +23,12 @@ struct SettingsView: View {
                 } footer: {
                     Text("Your files are in the Files app, under On My iPad or On My iPhone, in Swiftpolis.")
                 }
+                Section {
+                    Text("Clicking a file in Safari can send it here. Turn this on in the Settings app, under Apps, Safari, Extensions, then Swiftpolis, and allow it on all websites.")
+                        .font(.footnote)
+                } header: {
+                    Text("Safari")
+                }
                 Section("About") {
                     LabeledContent("Version", value: version)
                     Text("Based on Persepolis Download Manager, by its developers and contributors. Copyright © 2026 Amir Abravesh. Free software under the GNU General Public License, version 3.")

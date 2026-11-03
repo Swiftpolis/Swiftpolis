@@ -19,6 +19,8 @@ final class AddLinksViewModel {
 
     private let model: MobileModel
     private var nameLookup: Task<Void, Never>?
+    /// What Safari sent along with a link, such as its cookies. The text field only holds addresses.
+    private var sharedLinkDetails: [String: BrowserLink] = [:]
 
     /// Some servers refuse many requests at once, and these are only for showing names.
     private static let lookupsAtOnce = 4
@@ -70,7 +72,12 @@ final class AddLinksViewModel {
     /// shared twice before the app came to the front still only shows once.
     func takeSharedLinks() {
         var seen = Set(LinkText.links(in: text))
-        let shared = model.takeSharedLinks().filter { seen.insert($0).inserted }.joined(separator: "\n")
+        var addresses: [String] = []
+        for link in model.takeSharedLinks() where seen.insert(link.url).inserted {
+            sharedLinkDetails[link.url] = link
+            addresses.append(link.url)
+        }
+        let shared = addresses.joined(separator: "\n")
         guard !shared.isEmpty else { return }
         text = text.isEmpty ? shared : text + "\n" + shared
     }
@@ -94,7 +101,7 @@ final class AddLinksViewModel {
         let previous = draft.items
         var next = BatchDraft(
             preferences: model.preferences,
-            links: LinkText.links(in: text).map { BrowserLink(url: $0) }
+            links: LinkText.links(in: text).map { sharedLinkDetails[$0] ?? BrowserLink(url: $0) }
         )
         next.options = draft.options
         for index in next.items.indices {
@@ -109,7 +116,7 @@ final class AddLinksViewModel {
 
     private func lookUpNames() {
         nameLookup?.cancel()
-        let missing = draft.items.filter { $0.name == nil }.map(\.link.url)
+        let missing = draft.items.filter { $0.name == nil }.map(\.link)
         let settings = model.preferences.engineSettings
         nameLookup = Task {
             try? await Task.sleep(for: .milliseconds(300))
@@ -119,8 +126,11 @@ final class AddLinksViewModel {
                 await withTaskGroup(of: (String, String?).self) { group in
                     for link in links {
                         group.addTask {
-                            let request = DownloadRequest(link: link, folder: "", connections: 1)
-                            return (link, await Spider.look(at: request, secrets: DownloadSecrets(), settings: settings).fileName)
+                            var request = DownloadRequest(link: link.url, folder: "", connections: 1)
+                            request.referer = link.referrer
+                            request.userAgent = link.userAgent
+                            let secrets = DownloadSecrets(cookieHeader: link.cookies)
+                            return (link.url, await Spider.look(at: request, secrets: secrets, settings: settings).fileName)
                         }
                     }
                     for await (link, name) in group {

@@ -49,10 +49,19 @@ function sendToApp(links) {
         .catch((error) => console.error("Couldn't reach Swiftpolis", error));
 }
 
-async function sendLinks(urls, referrer) {
+async function sendLinks(urls, referrer, tabId) {
     const usable = urls.filter((url) => url !== "");
-    if (usable.length > 0) {
-        sendToApp(await Promise.all(usable.map((url) => makeLink(url, referrer))));
+    if (usable.length === 0) return;
+    const answer = await sendToApp(await Promise.all(usable.map((url) => makeLink(url, referrer))));
+
+    // On iOS the links wait in the inbox, as an extension can't open the app. The page offers the way there.
+    if (answer && answer.opensApp === false && tabId !== undefined) {
+        await addStyles(tabId);
+        api.tabs.sendMessage(
+            tabId,
+            { type: "sentToApp", count: usable.length, delivered: answer.delivered },
+            { frameId: 0 }
+        );
     }
 }
 
@@ -93,12 +102,12 @@ api.runtime.onStartup.addListener(applyConfig);
 api.runtime.onMessage.addListener((request, sender, sendResponse) => {
     switch (request.type) {
     case "captureLink":
-        sendLinks([request.url], sender.url);
+        sendLinks([request.url], sender.url, sender.tab && sender.tab.id);
         break;
 
     case "getAll":
     case "getSelected":
-        sendLinks(request.message, sender.url);
+        sendLinks(request.message, sender.url, sender.tab && sender.tab.id);
         break;
 
     case "pickLinks":
@@ -130,7 +139,15 @@ api.runtime.onMessage.addListener((request, sender, sendResponse) => {
     return false;
 });
 
+// Safari doesn't always apply the manifest's stylesheet to a page, so anything shown on one asks for it again.
+function addStyles(tabId) {
+    return api.scripting
+        .insertCSS({ target: { tabId }, files: ["contentScripts/modal.css"] })
+        .catch((error) => console.log("Couldn't add styles", error));
+}
+
 async function injectLinkPicker(tabId, script) {
+    await addStyles(tabId);
     await api.scripting.executeScript({ target: { tabId }, files: ["scripts/injector.js"] });
     await api.scripting.executeScript({ target: { tabId }, files: [script] });
 }

@@ -19,6 +19,8 @@ Built on the same kit, with what iOS rules out listed in
 - [x] iPad: sidebar, keyboard shortcuts, drag and drop of links
 - [x] Share extension: send a page, several links or selected text from any app to the Add Links sheet.
   See [ADR 0011](adr/0011-ios-links-arrive-by-share-extension.md)
+- [x] Safari extension: tapped file links and the popup's link picker reach the Add Links sheet.
+  See [ADR 0011](adr/0011-ios-links-arrive-by-share-extension.md)
 - [ ] Choosing another folder
 
 ## Adding downloads

@@ -112,8 +112,10 @@ Chrome, Firefox ─ native messaging ──▶ swiftpolis-native-host ───�
   Persepolis creates those folders whether or not the browser is installed, so this can't be relied on to mean
   the browser is there. Persepolis and Swiftpolis share the native host name `com.persepolis.pdmchromewrapper`, so if both are installed, whichever launched
   last receives those browsers' requests.
-- **The Safari extension** is forked into `SafariExtension/`, renamed, and macOS only
-  ([Q23](open-questions.md)). Its `background.js` and `content.js` were rewritten for Safari.
+- **The Safari extension** is forked into `SafariExtension/` and renamed
+  ([Q23](open-questions.md)). Its `background.js` and `content.js` were rewritten for Safari, and its popup and
+  link picker were redesigned without Materialize or jQuery. The same files also build for iOS, as
+  `SwiftpolisMobileSafari`.
 
 ### Safari click capture
 

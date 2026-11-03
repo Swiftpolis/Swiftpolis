@@ -4,9 +4,16 @@ import SwiftpolisBridge
 import os
 
 /// Safari sends the extension's native messages here, inside this sandboxed extension. It passes any
-/// links to the app through the inbox they share.
+/// links to the app through the inbox they share. On iOS it can't open the app, so it says so, and the
+/// page offers a button to do it.
 final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
     private static let logger = Logger(subsystem: "com.amirabravesh.Swiftpolis.Extension", category: "Browser")
+
+    #if os(iOS)
+    private static let opensApp = false
+    #else
+    private static let opensApp = true
+    #endif
 
     func beginRequest(with context: NSExtensionContext) {
         let item = context.inputItems.first as? NSExtensionItem
@@ -19,7 +26,7 @@ final class SafariWebExtensionHandler: NSObject, NSExtensionRequestHandling {
         }
 
         let response = NSExtensionItem()
-        response.userInfo = [SFExtensionMessageKey: ["enable": true, "delivered": delivered]]
+        response.userInfo = [SFExtensionMessageKey: ["enable": true, "delivered": delivered, "opensApp": Self.opensApp]]
         context.completeRequest(returningItems: [response], completionHandler: nil)
     }
 

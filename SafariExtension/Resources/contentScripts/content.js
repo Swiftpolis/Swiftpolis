@@ -70,3 +70,38 @@ window.addEventListener("keyup", (event) => {
         sendToExtension("toggle");
     }
 });
+
+// Only iOS asks for this. See background.js.
+BrowserNameSpace.runtime.onMessage.addListener((message) => {
+    if (message.type === "sentToApp") showSentToApp(message.count, message.delivered);
+});
+
+let sentToAppTimer;
+
+function showSentToApp(count, delivered) {
+    document.getElementById("pdm-toast")?.remove();
+    clearTimeout(sentToAppTimer);
+
+    const toast = document.createElement("div");
+    toast.id = "pdm-toast";
+    toast.setAttribute("role", "status");
+
+    const text = document.createElement("span");
+    if (!delivered) {
+        text.textContent = "Couldn't send that to Swiftpolis";
+    } else {
+        text.textContent = count === 1 ? "Link sent to Swiftpolis" : `${count} links sent to Swiftpolis`;
+    }
+    toast.append(text);
+
+    if (delivered) {
+        // Carries no data. The app checks its inbox whenever it comes to the front.
+        const open = document.createElement("a");
+        open.href = "swiftpolis://inbox";
+        open.textContent = "Open";
+        toast.append(open);
+    }
+
+    document.documentElement.append(toast);
+    sentToAppTimer = setTimeout(() => toast.remove(), 8000);
+}

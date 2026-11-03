@@ -31,7 +31,7 @@ None at the moment. New questions will appear here as the build raises them.
 | Q20 | Clipboard monitoring off by default; detect link-like content before reading | [settings.md](settings.md) |
 | Q21 | Browser cookies in the Keychain per Download, removed on completion or removal | [browser-integration.md](browser-integration.md) |
 | Q22 | Shared App Group inbox plus a `swiftpolis://` wake-up | [ADR 0007](adr/0007-browser-requests-via-shared-inbox.md) |
-| Q23 | Extension forked into this repo, renamed, macOS only; store extensions stay for other browsers | [browser-integration.md](browser-integration.md) |
+| Q23 | Extension forked into this repo and renamed, first for macOS and later for iOS too; store extensions stay for other browsers | [browser-integration.md](browser-integration.md) |
 | Q24 | Build order | [roadmap.md](roadmap.md) |
 | Q25 | "New version" notice from a public GitHub repo; no Sparkle yet | [roadmap.md](roadmap.md) |
 | Q26 | Non-UI code in a local Swift package; the app is a thin SwiftUI layer | [ADR 0009](adr/0009-domain-and-services-in-a-local-package.md) |

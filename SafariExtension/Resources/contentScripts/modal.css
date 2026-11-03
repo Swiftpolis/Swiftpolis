@@ -266,3 +266,32 @@
         min-height: 44px !important;
     }
 }
+
+/* What says links reached the inbox, on iOS. */
+#pdm-toast {
+    all: unset;
+    position: fixed !important;
+    left: 50% !important;
+    bottom: calc(16px + env(safe-area-inset-bottom)) !important;
+    z-index: 2147483647 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 14px !important;
+    max-width: calc(100vw - 32px) !important;
+    padding: 11px 16px !important;
+    box-sizing: border-box !important;
+    border-radius: 14px !important;
+    background: #1d1a19 !important;
+    box-shadow: 0 10px 34px rgba(0, 0, 0, 0.32) !important;
+    color: #f4efed !important;
+    font: 500 15px/1.3 -apple-system, BlinkMacSystemFont, sans-serif !important;
+    transform: translateX(-50%) !important;
+    white-space: nowrap !important;
+}
+
+#pdm-toast a {
+    all: unset;
+    color: #ef6a54 !important;
+    font: 600 15px/1.3 -apple-system, BlinkMacSystemFont, sans-serif !important;
+    cursor: pointer !important;
+}
