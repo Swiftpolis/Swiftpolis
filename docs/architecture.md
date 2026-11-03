@@ -53,15 +53,16 @@ windows open, or none.
 
 | Persepolis | Swiftpolis |
 | --- | --- |
-| `mainwindow.py` | `MainWindowViewModel`, `AppModel`, `DownloadCoordinator`, and `QueueRunner` in step 4 |
+| `mainwindow.py` | `MainWindowViewModel`, `AppModel`, `DownloadCoordinator` |
 | `QThread` and polling loops | Actors, `Task`, `AsyncStream` |
-| `queue.py` | `QueueRunner` |
+| `queue.py` | `DownloadCoordinator`'s Queue section |
+| Clock loops in each engine | `ScheduledDownload`, which wraps any engine |
 | `persepolis_lib_prime.py` | `HTTPDownloadEngine` |
 | `ytdlp_downloader.py`, `video_finder.py` | `YtDlpEngine`, `VideoPairCoordinator` |
 | `libtorrent_wrapper.py` | `TorrentEngine` ([Q8](open-questions.md)) |
 | `data_base.py` | `@Model` types and repositories |
 | `QSettings` | `SettingsStore` |
-| `shutdown.py` | `ShutdownService`, using a system shutdown request and no root password |
+| `shutdown.py` | `DownloadCoordinator`'s shutdown sequence, then `SystemShutdown` |
 | `KeepAwakeThread` | Power assertion ([Q19](open-questions.md)) |
 | `browser_integration.py`, `plugins.db` | Extension target and `BrowserRequestInbox` |
 

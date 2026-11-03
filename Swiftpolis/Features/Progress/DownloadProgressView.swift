@@ -32,6 +32,8 @@ struct DownloadProgressView: View {
                 Slider(value: $viewModel.speedDial, in: 0...Double(SpeedDialLabel.maximum), step: 1)
             }
 
+            Toggle("Shut down the Mac when this download finishes", isOn: $viewModel.shutsDownAfterwards)
+
             HStack {
                 Spacer()
                 Button("Resume") { viewModel.resume() }.disabled(!viewModel.canResume)

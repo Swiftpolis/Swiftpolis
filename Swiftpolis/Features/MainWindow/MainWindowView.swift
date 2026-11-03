@@ -48,6 +48,10 @@ private struct DownloadsSplitView: View {
     @State private var isConfirmingDelete = false
     @State private var isConfirmingClear = false
     @State private var isChoosingMoveFolder = false
+    @State private var isNamingQueue = false
+    @State private var newQueueName = "queue"
+    @State private var isConfirmingRemoveQueue = false
+    @AppStorage("suppressesRemoveQueueWarning") private var suppressesRemoveQueueWarning = false
     @AppStorage("suppressesDeleteWarning") private var suppressesDeleteWarning = false
     @Environment(\.openWindow) private var openWindow
 
@@ -56,7 +60,12 @@ private struct DownloadsSplitView: View {
             List(viewModel.categories, id: \.name, selection: $viewModel.selectedCategoryName) { category in
                 Text(category.name)
             }
-            .navigationSplitViewColumnWidth(min: 170, ideal: 190)
+            .safeAreaInset(edge: .bottom) {
+                if viewModel.isQueueSelected {
+                    QueuePanel(viewModel: viewModel)
+                }
+            }
+            .navigationSplitViewColumnWidth(min: 230, ideal: 250)
         } detail: {
             VStack(spacing: 0) {
                 table
@@ -82,6 +91,21 @@ private struct DownloadsSplitView: View {
             Button("Clear Download List", role: .destructive) { viewModel.clearList() }
             Button("Cancel", role: .cancel) {}
         }
+        .alert("Enter queue name:", isPresented: $isNamingQueue) {
+            TextField("Queue", text: $newQueueName)
+            Button("OK") { viewModel.createQueue(named: newQueueName) }
+            Button("Cancel", role: .cancel) {}
+        }
+        .confirmationDialog(
+            "This operation will remove all download items in this queue from \"All Downloads\" list!",
+            isPresented: $isConfirmingRemoveQueue
+        ) {
+            Button("Remove Queue", role: .destructive) { viewModel.removeSelectedQueue() }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Do you want to continue?")
+        }
+        .dialogSuppressionToggle("Don't show this message again", isSuppressed: $suppressesRemoveQueueWarning)
         .fileImporter(isPresented: $isChoosingMoveFolder, allowedContentTypes: [.folder]) { result in
             if case .success(let folder) = result { viewModel.moveSelectedFiles(to: folder) }
         }
@@ -146,6 +170,27 @@ private struct DownloadsSplitView: View {
             .disabled(!viewModel.hasSelection)
         Button("Move Selected Download Files to Another Folder...") { isChoosingMoveFolder = true }
             .disabled(!actions.canMoveFile)
+        Divider()
+        Menu("Add to") {
+            ForEach(viewModel.moveTargets, id: \.self) { category in
+                Button(category) { viewModel.moveSelection(toCategory: category) }
+            }
+        }
+        .disabled(!viewModel.hasSelection)
+        if viewModel.isQueueSelected {
+            Button("Move Selected Items Up") { viewModel.moveSelection(.up) }
+                .disabled(!viewModel.canMoveSelection)
+            Button("Move Selected Items Down") { viewModel.moveSelection(.down) }
+                .disabled(!viewModel.canMoveSelection)
+        }
+    }
+
+    private func requestRemoveQueue() {
+        if suppressesRemoveQueueWarning {
+            viewModel.removeSelectedQueue()
+        } else {
+            isConfirmingRemoveQueue = true
+        }
     }
 
     private func requestDelete() {
@@ -177,7 +222,20 @@ private struct DownloadsSplitView: View {
             .disabled(!viewModel.hasSelection)
             Button("Delete Selected Download Files", systemImage: "trash") { requestDelete() }
                 .disabled(!viewModel.hasSelection)
+            if viewModel.isQueueSelected {
+                Button("Move Selected Items Up", systemImage: "arrow.up") { viewModel.moveSelection(.up) }
+                    .disabled(!viewModel.canMoveSelection)
+                Button("Move Selected Items Down", systemImage: "arrow.down") { viewModel.moveSelection(.down) }
+                    .disabled(!viewModel.canMoveSelection)
+            }
             Menu("More", systemImage: "ellipsis") {
+                Button("Create New Queue...") {
+                    newQueueName = "queue"
+                    isNamingQueue = true
+                }
+                Button("Remove Queue") { requestRemoveQueue() }
+                    .disabled(!viewModel.canRemoveSelectedQueue)
+                Divider()
                 Menu("Sort by") {
                     Button("File Name") { viewModel.sort(by: .name) }
                     Button("File Size") { viewModel.sort(by: .size) }
@@ -190,6 +248,76 @@ private struct DownloadsSplitView: View {
                 Divider()
                 Button("Clear Download List") { isConfirmingClear = true }
             }
+        }
+    }
+}
+
+/// The side panel's options for the selected Queue. Which ones show depends on whether it's running.
+private struct QueuePanel: View {
+    @Bindable var viewModel: MainWindowViewModel
+    @State private var options = QueueOptions()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            if viewModel.isSelectedQueueRunning {
+                runningControls
+            } else {
+                stoppedControls
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
+        .task(id: viewModel.selectedCategoryName) {
+            options = viewModel.selectedCategory?.options ?? QueueOptions()
+        }
+    }
+
+    private var stoppedControls: some View {
+        Group {
+            HStack {
+                Toggle("Start time", isOn: $options.startTimeEnabled)
+                Spacer()
+                ClockTimePicker("Start time", time: $options.startTime)
+                    .labelsHidden()
+                    .disabled(!options.startTimeEnabled)
+            }
+            HStack {
+                Toggle("End time", isOn: $options.endTimeEnabled)
+                Spacer()
+                ClockTimePicker("End time", time: $options.endTime)
+                    .labelsHidden()
+                    .disabled(!options.endTimeEnabled)
+            }
+            Toggle("Download bottom of the list first", isOn: $options.isReversed)
+            Text(ScheduleNotes.short)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(4)
+                .help(ScheduleNotes.text)
+            Button("Start Queue") {
+                viewModel.updateSelectedQueueOptions(options)
+                viewModel.startSelectedQueue()
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .onChange(of: options) { _, new in viewModel.updateSelectedQueueOptions(new) }
+    }
+
+    private var runningControls: some View {
+        Group {
+            Text(SpeedDialLabel.text(for: Int(viewModel.selectedQueueDial))).font(.callout)
+            Slider(
+                value: Binding(get: { viewModel.selectedQueueDial }, set: { viewModel.selectedQueueDial = $0 }),
+                in: 0...Double(SpeedDialLabel.maximum),
+                step: 1
+            )
+            Toggle(
+                "Shut down the Mac when this queue finishes",
+                isOn: Binding(get: { viewModel.selectedQueueShutsDown }, set: { viewModel.selectedQueueShutsDown = $0 })
+            )
+            Button("Stop Queue") { viewModel.stopSelectedQueue() }
+                .frame(maxWidth: .infinity)
         }
     }
 }

@@ -40,6 +40,8 @@ final class PreferencesViewModel {
         preferences.timeoutSeconds = defaults.timeoutSeconds
         preferences.connections = defaults.connections
         preferences.chunkSizeKiB = defaults.chunkSizeKiB
+        preferences.queueWaitHours = defaults.queueWaitHours
+        preferences.queueWaitMinutes = defaults.queueWaitMinutes
         preferences.verifiesCertificates = defaults.verifiesCertificates
     }
 }
@@ -59,7 +61,7 @@ struct PreferencesView: View {
             Tab("Notifications", systemImage: "bell") { notificationsTab }
             Tab("Behaviour", systemImage: "gearshape") { behaviourTab }
         }
-        .frame(width: 520, height: 340)
+        .frame(width: 520, height: 420)
     }
 
     private var downloadTab: some View {
@@ -69,6 +71,8 @@ struct PreferencesView: View {
             Stepper("Timeout (seconds): \(viewModel.preferences.timeoutSeconds)", value: $viewModel.preferences.timeoutSeconds, in: 1...600)
             Stepper("Number of connections: \(viewModel.preferences.connections)", value: $viewModel.preferences.connections, in: 1...64)
             Stepper("Chunk size (KiB): \(viewModel.preferences.chunkSizeKiB)", value: $viewModel.preferences.chunkSizeKiB, in: 10...10_000, step: 10)
+            Stepper("Wait between queue items (hours): \(viewModel.preferences.queueWaitHours)", value: $viewModel.preferences.queueWaitHours, in: 0...23)
+            Stepper("Wait between queue items (minutes): \(viewModel.preferences.queueWaitMinutes)", value: $viewModel.preferences.queueWaitMinutes, in: 0...59)
             Toggle("Verify servers' certificates", isOn: $viewModel.preferences.verifiesCertificates)
             Button("Defaults") { viewModel.restoreDownloadDefaults() }
         }

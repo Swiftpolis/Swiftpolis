@@ -33,9 +33,24 @@ final class AddLinkViewModel {
     }
 
     func load() async {
+        await reloadCategories()
+        await fillLinkFromClipboard()
+    }
+
+    private func reloadCategories() async {
         let names = (try? await services.library.categories().map(\.name)) ?? []
         categories = names.filter { CategoryKind(categoryName: $0) != .allDownloads }
-        await fillLinkFromClipboard()
+    }
+
+    /// Creates a Queue from this window, and adds to it.
+    func createQueue(named name: String) async {
+        do {
+            try await services.coordinator.createQueue(named: name)
+            await reloadCategories()
+            draft.category = name
+        } catch {
+            model.notify("Operation was not successful.", body: QueueNaming.message(for: error, name: name), sound: .fail)
+        }
     }
 
     /// As in Persepolis, a copied link fills the field. Looking for a link pattern first means the
@@ -107,7 +122,7 @@ final class AddLinkViewModel {
                 startNow: startNow
             )
             if startNow, CategoryKind(categoryName: draft.category) == .singleDownloads {
-                model.didStart(gid)
+                model.didStart(gid, isScheduled: draft.request.startTime != nil)
             }
             return true
         } catch {

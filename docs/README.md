@@ -10,8 +10,8 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
   (`Side_Projects/persepolis`)
 - **Parity rule:** same rules, with known defects fixed ([ADR 0001](adr/0001-parity-with-defects-fixed.md))
 - **Distribution:** Developer ID, unsandboxed, GPLv3 ([ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md))
-- **Status:** step 3 of 8 ([roadmap.md](roadmap.md)). Single Downloads work from the app. Queues,
-  schedules, browsers, video and torrents don't yet.
+- **Status:** step 4 of 8 ([roadmap.md](roadmap.md)). Single Downloads, Queues and schedules work from
+  the app. Browsers, video and torrents don't yet.
 
 ## Documentation index
 
@@ -26,7 +26,7 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
 | [data-model.md](data-model.md) | Persepolis tables and their lifecycle | From source |
 | [settings.md](settings.md) | Every preference and its default | From source |
 | [browser-integration.md](browser-integration.md) | Wire protocol, extension behaviour, Safari constraints | From source |
-| [persepolis-observed.md](persepolis-observed.md) | What the real HTTP engine did when run; the reference for tests | Observed |
+| [persepolis-observed.md](persepolis-observed.md) | What the real engine and Queues did when run; the reference for tests | Observed |
 | [upstream-defects.md](upstream-defects.md) | Persepolis bugs Swiftpolis fixes | Mixed |
 | [architecture.md](architecture.md) | Proposed MVVM structure | Draft |
 | [project-structure.md](project-structure.md) | Where the code is, file by file | Living |

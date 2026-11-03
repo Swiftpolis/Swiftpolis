@@ -1,14 +1,16 @@
 # Observed Persepolis behaviour
 
-What the real HTTP engine did when run, unmodified, against a local server that misbehaves on
-purpose. This is the reference for the Swift engine's tests. Where it disagrees with the other docs,
-this wins.
+What the real HTTP engine and Queue thread did when run, unmodified, against a local server that
+misbehaves on purpose. This is the reference for the Swift tests. Where it disagrees with the other
+docs, this wins.
 
 - **Code:** Persepolis `test` at `8940bcf`, using its own `venv` (Python 3.12, requests 2.32.5).
 - **Date:** 3 November 2026.
-- **To repeat it:** [`tools/persepolis-characterization/observe_http_engine.py`](../tools/persepolis-characterization/observe_http_engine.py).
-- **Limits:** the engine ran with a fake main window, so nothing here covers the Queue thread, the
-  database or the UI. Everything was on loopback, so real-network timing will differ.
+- **To repeat it:** [`observe_http_engine.py`](../tools/persepolis-characterization/observe_http_engine.py)
+  and [`observe_queue.py`](../tools/persepolis-characterization/observe_queue.py).
+- **Limits:** the main window was faked, so nothing here covers the real UI. The Queue scenarios use the
+  real Queue thread, engine and database, with a copy of the thread that writes live status to the
+  database. Everything was on loopback, so real-network timing will differ.
 
 ## What matched the reading of the code
 
@@ -81,8 +83,7 @@ All are in [upstream-defects.md](upstream-defects.md).
 | D15 | Mixed-case archive extensions can't match | **Mostly wrong.** `old.Z` did reach `Compressed`, because lowercase `z` is also listed. Only `.f` is affected |
 | D16 | One-character names crash on collision | **Confirmed.** `IndexError`, and the file stays outside its subfolder |
 
-Not tested here, because they need more than the engine: D2 and D9 (step 4), D8 (step 5). D3 and D5 are
-UI wiring.
+D2 and D9 are confirmed under [Queues](#queues). D8 waits for step 5. D3 and D5 are UI wiring.
 
 ## Other details
 
@@ -91,6 +92,40 @@ UI wiring.
   on to finish normally.
 - `error_message` isn't cleared: a download with no `Content-Length` can finish as `complete` and still
   carry the message `Error`.
+
+## Queues
+
+Files were added `a`, then `b`, then `c`, each on one Connection.
+
+| Scenario | Observed |
+| --- | --- |
+| Default order | `c, b, a`, newest first, with never more than one request at a time |
+| Reverse | `a, b, c` |
+| `b` always fails, `max-tries` 0 | Requests in order: `c, b, a, b, b, b, b`, so five tries. `b` ends `error`, and the notification is still "Queue completed!" |
+| Added while running | `a` finishes, then `late` runs on the next Pass |
+| Stopped by the user | Only `c` ever ran, and "Queue Stopped!" appeared about 2 seconds later |
+| Already complete | Skipped, with no requests |
+| Empty Queue | "Queue completed!" straight away |
+| Reverse changed during a run | The next Pass used the new order (`b, a, a, b, a, b, ...`). It's read live from the window's check box, which is D9 |
+| Speed dial | Applied at the start (sleep 0.025 s at dial 5, one Connection), and again when moved (0.05 s at dial 0) |
+| Time per item | About 4 seconds per 1-second file, which includes the Queue's own 3 second sleep |
+
+### Clock times
+
+| Scenario | Observed |
+| --- | --- |
+| Start time | The first unfinished item shows `scheduled`, and the rest stay `stopped` with no Start time. The first request came 1.9 seconds into the chosen minute, and the stored time was then cleared |
+| End time | Set on each item as it starts. At the minute, the item stopped and the Queue ended 3.2 seconds in. The next item never ran. **Both** "Queue Stopped!" and "Queue completed!" appeared, which is D29 |
+| Finishing before the End time | **D2 confirmed.** The Queue finished with the item `complete`, but one session stayed open. At the End time, the item flipped to `stopped`, even though its file was finished |
+| Queue wait of 1 minute | First request at 07:26:08, second at 07:27:01: it lands on the clock minute |
+
+### After-download shutdown
+
+- A finished Queue sets the shutdown request, and notifies "your system in 20 seconds", then "Queue completed!".
+- Stopping the Queue clears the check box, and no request is made.
+- From reading `queue.py`: an End-time stop leaves `start` set, so a requested shutdown still happens.
+
+The real shutdown wasn't run, because `shutDown()` needs a root password and would turn the Mac off.
 
 ## Early checks for the Swift engine
 

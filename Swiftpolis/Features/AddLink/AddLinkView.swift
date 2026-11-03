@@ -11,7 +11,11 @@ struct AddLinkView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            DownloadOptionsForm(draft: $viewModel.draft, categories: viewModel.categories) {
+            DownloadOptionsForm(
+                draft: $viewModel.draft,
+                categories: viewModel.categories,
+                createQueue: { name in Task { await viewModel.createQueue(named: name) } }
+            ) {
                 LabeledContent("File") {
                     Text(viewModel.fileDescription)
                         .lineLimit(1)

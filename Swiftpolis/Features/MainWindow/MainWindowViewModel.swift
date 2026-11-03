@@ -30,6 +30,10 @@ final class MainWindowViewModel {
     var selectedCategoryName = CategoryKind.allDownloadsName
     var selection: Set<GID> = []
 
+    /// Each Queue's panel settings while it runs, which last only as long as the run.
+    private var queueDials: [String: Double] = [:]
+    private var queueShutdowns: Set<String> = []
+
     private let model: AppModel
     private let unknown = "***"
     private static let dateFormatter: DateFormatter = {
@@ -40,6 +44,9 @@ final class MainWindowViewModel {
 
     init(model: AppModel) {
         self.model = model
+        #if DEBUG
+        if let category = DebugAutomation.initialCategory { selectedCategoryName = category }
+        #endif
     }
 
     private var services: AppModel.Services? { model.services }
@@ -107,8 +114,13 @@ final class MainWindowViewModel {
         guard let gid = selectedDownload?.gid else { return }
         control("resume") { [self] coordinator in
             try await coordinator.resume(gid)
-            model.showProgressWindow(gid)
+            if await !isQueued(gid) { model.showProgressWindow(gid) }
         }
+    }
+
+    private func isQueued(_ gid: GID) async -> Bool {
+        let category = try? await services?.library.download(gid)?.category
+        return category.flatMap { $0 }.map { CategoryKind(categoryName: $0) == .queue } ?? false
     }
 
     func pause() {
@@ -217,6 +229,8 @@ final class MainWindowViewModel {
                 model.notify("Operation was not successful!", body: "Following download is not complete: \(name)", sound: .fail)
             case .moveFailed(let name):
                 model.notify(name, body: "Operation was not successful!", sound: .fail)
+            case .queueRunning(let queue):
+                model.notify("Operation was not successful!", body: "Please stop the following category first: \(queue)", sound: .fail)
             }
         }
     }
@@ -226,9 +240,116 @@ final class MainWindowViewModel {
         Task {
             do {
                 try await coordinator.clearList()
+                queueDials = [:]
+                queueShutdowns = []
                 selectedCategoryName = CategoryKind.allDownloadsName
             } catch {
                 model.notify("Stop all downloads first!", sound: .fail)
+            }
+        }
+    }
+
+    // MARK: Queues
+
+    var selectedCategory: CategorySummary? {
+        categories.first { $0.name == selectedCategoryName }
+    }
+
+    var isQueueSelected: Bool { selectedCategory?.kind == .queue }
+    var isSelectedQueueRunning: Bool { model.runningQueues.contains(selectedCategoryName) }
+
+    /// The categories Downloads can be moved to from the selected one.
+    var moveTargets: [String] {
+        categories.map(\.name).filter {
+            CategoryKind(categoryName: $0) != .allDownloads && $0 != selectedCategoryName
+        }
+    }
+
+    func updateSelectedQueueOptions(_ options: QueueOptions) {
+        guard let coordinator = services?.coordinator else { return }
+        let name = selectedCategoryName
+        Task { try? await coordinator.updateQueueOptions(options, named: name) }
+    }
+
+    func startSelectedQueue() {
+        guard let coordinator = services?.coordinator else { return }
+        let name = selectedCategoryName
+        queueDials[name] = nil
+        queueShutdowns.remove(name)
+        Task { try? await coordinator.startQueue(name) }
+    }
+
+    func stopSelectedQueue() {
+        guard let coordinator = services?.coordinator else { return }
+        let name = selectedCategoryName
+        Task { await coordinator.stopQueue(name) }
+    }
+
+    var selectedQueueDial: Double {
+        get { queueDials[selectedCategoryName] ?? Double(SpeedDialLabel.maximum) }
+        set {
+            queueDials[selectedCategoryName] = newValue
+            let name = selectedCategoryName
+            let dial = Int(newValue)
+            Task { await services?.coordinator.setSpeedDial(dial, queue: name) }
+        }
+    }
+
+    var selectedQueueShutsDown: Bool {
+        get { queueShutdowns.contains(selectedCategoryName) }
+        set {
+            let name = selectedCategoryName
+            if newValue { queueShutdowns.insert(name) } else { queueShutdowns.remove(name) }
+            Task { await services?.coordinator.setShutdownAfterQueue(newValue, queue: name) }
+        }
+    }
+
+    func createQueue(named name: String) {
+        guard let coordinator = services?.coordinator else { return }
+        Task {
+            do {
+                try await coordinator.createQueue(named: name)
+                selectedCategoryName = name
+            } catch {
+                model.notify("Error!", body: QueueNaming.message(for: error, name: name), sound: .fail)
+            }
+        }
+    }
+
+    var canRemoveSelectedQueue: Bool {
+        isQueueSelected && CategoryKind.canRemove(categoryNamed: selectedCategoryName) && !isSelectedQueueRunning
+    }
+
+    func removeSelectedQueue() {
+        guard let coordinator = services?.coordinator else { return }
+        let name = selectedCategoryName
+        Task {
+            do {
+                try await coordinator.removeQueue(named: name)
+                selectedCategoryName = CategoryKind.allDownloadsName
+            } catch {
+                model.notify("Operation was not successful!", body: error.localizedDescription, sound: .fail)
+            }
+        }
+    }
+
+    var canMoveSelection: Bool { isQueueSelected && !isSelectedQueueRunning && hasSelection }
+
+    func moveSelection(_ direction: MoveDirection) {
+        guard let coordinator = services?.coordinator else { return }
+        let gids = Array(selection)
+        let name = selectedCategoryName
+        Task { try? await coordinator.moveInQueue(gids, queue: name, direction: direction) }
+    }
+
+    func moveSelection(toCategory category: String) {
+        guard let coordinator = services?.coordinator else { return }
+        let gids = Array(selection)
+        Task {
+            do {
+                report(try await coordinator.moveToCategory(gids, category: category))
+            } catch {
+                model.notify("Operation was not successful!", body: error.localizedDescription, sound: .fail)
             }
         }
     }

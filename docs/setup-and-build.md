@@ -17,7 +17,8 @@ The first real download into `~/Downloads` may make macOS ask for permission to 
 
 Debug builds can run without anyone at the keyboard, using a throwaway folder in place of your real
 library, preferences and Keychain. Clipboard reading is off in this mode. Release builds don't contain
-this. The variables are described in `Swiftpolis/Support/DebugAutomation.swift`.
+this. It also never really shuts the Mac down. The variables are described in
+`Swiftpolis/Support/DebugAutomation.swift`.
 
 ## Record Persepolis's behaviour
 
@@ -27,6 +28,12 @@ Replace `<persepolis>` with the path to your checkout.
 
 ```bash
 HOME=$(mktemp -d) PYTHONPATH=<persepolis> <persepolis>/venv/bin/python tools/persepolis-characterization/observe_http_engine.py
+```
+
+The Queue scenarios work the same way, and wait for real minutes, so they take several minutes:
+
+```bash
+HOME=$(mktemp -d) PYTHONPATH=<persepolis>:tools/persepolis-characterization <persepolis>/venv/bin/python tools/persepolis-characterization/observe_queue.py
 ```
 
 [persepolis-observed.md](persepolis-observed.md) records what the results meant.

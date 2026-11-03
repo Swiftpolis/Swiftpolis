@@ -12,10 +12,18 @@ import SwiftpolisServices
 /// - `SWIFTPOLIS_DEBUG_SNAPSHOTS`: a folder to write each window to, as PNGs, once a second.
 /// - `SWIFTPOLIS_DEBUG_ADD`: a link to add and start once the app is ready.
 /// - `SWIFTPOLIS_DEBUG_OPEN`: window IDs to open, separated by commas.
+/// - `SWIFTPOLIS_DEBUG_QUEUE`: links to add to Scheduled Downloads, separated by commas, before starting
+///   it and showing it in the main window.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
 
     static var isActive: Bool { data != nil }
+
+    /// The Category the main window should open on.
+    static var initialCategory: String? {
+        guard isActive, ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_QUEUE"] != nil else { return nil }
+        return CategoryKind.scheduledDownloadsName
+    }
 
     nonisolated static func environment() -> AppDependencies.Environment? {
         guard let data = ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] else { return nil }
@@ -45,6 +53,17 @@ enum DebugAutomation {
             for id in (environment["SWIFTPOLIS_DEBUG_OPEN"] ?? "").split(separator: ",") {
                 model.openWindowAction?(id: String(id))
             }
+            if let links = environment["SWIFTPOLIS_DEBUG_QUEUE"], let services = model.services {
+                for link in links.split(separator: ",") {
+                    var draft = DownloadDraft(preferences: model.preferences)
+                    draft.link = String(link)
+                    draft.category = CategoryKind.scheduledDownloadsName
+                    _ = try? await services.coordinator.add(
+                        draft.request, secrets: draft.secrets, to: draft.category, startNow: false
+                    )
+                }
+                try? await services.coordinator.startQueue(CategoryKind.scheduledDownloadsName)
+            }
             guard let link = environment["SWIFTPOLIS_DEBUG_ADD"], let services = model.services else { return }
             let draft = {
                 var draft = DownloadDraft(preferences: model.preferences)
@@ -54,7 +73,7 @@ enum DebugAutomation {
             if let gid = try? await services.coordinator.add(
                 draft.request, secrets: draft.secrets, to: CategoryKind.singleDownloadsName, startNow: true
             ) {
-                model.didStart(gid)
+                model.didStart(gid, isScheduled: false)
             }
         }
     }
@@ -81,6 +100,18 @@ enum DebugAutomation {
             .replacingOccurrences(of: "/", with: "_")
             .prefix(40)
         try? png.write(to: URL(filePath: "\(folder)/\(name).png"))
+        try? describe(view).write(toFile: "\(folder)/\(name).txt", atomically: true, encoding: .utf8)
+    }
+
+    /// The view tree as text, for layout problems a picture can't explain.
+    private static func describe(_ view: NSView, depth: Int = 0) -> String {
+        var text = String(repeating: "  ", count: depth)
+            + "\(type(of: view)) \(Int(view.frame.minX)),\(Int(view.frame.minY)) \(Int(view.frame.width))x\(Int(view.frame.height))"
+            + (view.isHidden ? " hidden" : "") + "\n"
+        for subview in view.subviews where depth < 14 {
+            text += describe(subview, depth: depth + 1)
+        }
+        return text
     }
 }
 #endif

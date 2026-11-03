@@ -16,6 +16,7 @@ Swiftpolis/                        App target: SwiftUI only
 ├── Support/
 │   ├── Notifier.swift             Notifications and sounds
 │   ├── SystemProxy.swift          The Add Link window's proxy detection
+│   ├── SystemShutdown.swift       Asks macOS to shut down
 │   └── DebugAutomation.swift      Debug builds only; see setup-and-build.md
 └── Resources/Sounds/              Persepolis's notification sounds
 
@@ -28,6 +29,7 @@ SwiftpolisKit/                     Local Swift package
 │   │   ├── CategoryKind.swift         Built-in Categories and Queue naming rules
 │   │   ├── LibraryValues.swift        Requests, options and summaries
 │   │   ├── DownloadActions.swift      What each status allows, and sort orders
+│   │   ├── Schedule.swift             Schedule windows and the Queue wait
 │   │   ├── Formatting.swift           Sizes, speeds and times as text
 │   │   └── WallClock.swift            Clock protocol and the real clock
 │   ├── SwiftpolisPersistence/
@@ -44,7 +46,8 @@ SwiftpolisKit/                     Local Swift package
 │   │   ├── HeaderProbe.swift          The HEAD request, and the Spider
 │   │   └── RequestRules.swift         Header and cookie text, retry and Speed dial rules
 │   ├── SwiftpolisServices/
-│   │   ├── DownloadCoordinator.swift  Runs Downloads and applies who-may-do-what rules
+│   │   ├── DownloadCoordinator.swift  Runs Downloads and Queues, and applies who-may-do-what rules
+│   │   ├── ScheduledDownload.swift    Adds a Start time and End time to any engine
 │   │   ├── DownloadDraft.swift        What Add Link and Properties edit
 │   │   ├── Preferences.swift          Preferences and where they're stored
 │   │   └── SecretStore.swift          Passwords, in the Keychain
@@ -58,6 +61,7 @@ SwiftpolisKit/                     Local Swift package
     ├── SwiftpolisEnginesTests/
     └── SwiftpolisServicesTests/
 
+Swiftpolis.entitlements            Lets the app ask System Events to shut down
 tools/
 └── persepolis-characterization/   Runs real Persepolis against a test server
 docs/                              This documentation

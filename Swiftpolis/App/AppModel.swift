@@ -38,6 +38,7 @@ final class AppModel {
     private(set) var snapshots: [GID: DownloadSnapshot] = [:]
     /// Goes up whenever a saved list changes, so anything showing one knows to reload it.
     private(set) var listRevision = 0
+    private(set) var runningQueues: Set<String> = []
 
     var preferences: Preferences {
         didSet {
@@ -67,7 +68,7 @@ final class AppModel {
         return nil
     }
 
-    var hasActiveDownloads: Bool { !snapshots.isEmpty }
+    var hasActiveDownloads: Bool { !snapshots.isEmpty || !runningQueues.isEmpty }
 
     func start() async {
         guard case .starting = state else { return }
@@ -78,6 +79,8 @@ final class AppModel {
             let coordinator = DownloadCoordinator(
                 library: library,
                 secrets: secrets,
+                queueWait: { store.preferences.queueWait },
+                shutDown: { await AppModel.shared.shutDownSystem() },
                 makeEngine: { request, secrets in
                     HTTPDownloadEngine(request: request, secrets: secrets, settings: store.preferences.engineSettings)
                 },
@@ -104,6 +107,12 @@ final class AppModel {
             case .finished(let download):
                 listRevision += 1
                 handleFinished(download)
+            case .queuesChanged(let names):
+                runningQueues = names
+            case .queueFinished(_, let outcome):
+                handleQueueFinished(outcome)
+            case .shuttingDown:
+                notify("Swiftpolis is shutting down", body: "your system in 20 seconds", sound: .warning)
             }
         }
     }
@@ -111,8 +120,8 @@ final class AppModel {
     // MARK: Starting and finishing
 
     /// Shows a just-started Download's progress window and says it has started.
-    func didStart(_ gid: GID) {
-        notify("Download Starts", sound: nil)
+    func didStart(_ gid: GID, isScheduled: Bool) {
+        notify(isScheduled ? "Download Scheduled" : "Download Starts", sound: nil)
         showProgressWindow(gid)
     }
 
@@ -133,12 +142,37 @@ final class AppModel {
                 NSApp.activate()
             }
         case .stopped:
-            notify("Download Stopped", body: name, sound: nil)
+            notify(download.errorMessage ?? "Download Stopped", body: name, sound: nil)
         case .error:
             let message = download.errorMessage ?? "Error"
             notify("Error - \(message)", body: name, sound: .fail)
         default:
             break
+        }
+    }
+
+    private func handleQueueFinished(_ outcome: QueueOutcome) {
+        switch outcome {
+        case .completed:
+            notify("Swiftpolis", body: "Queue completed!", sound: .queue)
+        case .stoppedByUser:
+            notify("Swiftpolis", body: "Queue Stopped!", sound: nil)
+        case .stoppedBySchedule(let message):
+            notify("Swiftpolis", body: message ?? "Queue Stopped!", sound: nil)
+        }
+    }
+
+    /// Only reached once a requested shutdown has stopped everything.
+    func shutDownSystem() {
+        #if DEBUG
+        // Automated runs must never really turn off the Mac they run on.
+        if DebugAutomation.isActive {
+            print("Would shut down now")
+            return
+        }
+        #endif
+        if let message = SystemShutdown.perform() {
+            notify("Couldn't shut down", body: message, sound: .fail)
         }
     }
 

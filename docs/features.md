@@ -8,10 +8,10 @@ Persepolis's mechanism.
 ## Adding downloads
 
 - [x] Add Link window: link, name, folder, Connections
-- [ ] Add Link window: Start time, End time (step 4)
+- [x] Add Link window: Start time, End time
 - [x] Add options: proxy (`http`, `socks5`), HTTP auth, referer, user agent, headers, cookie file
 - [x] Choose a Category
-- [ ] Create a Queue from the Add Link window (step 4)
+- [x] Create a Queue from the Add Link window
 - [x] "Download later"
 - [x] Warning when the same link was added before
 - [ ] Drag and drop links onto the main window
@@ -36,21 +36,21 @@ Persepolis's mechanism.
 
 Full rules in [queue-and-schedule.md](queue-and-schedule.md).
 
-- [ ] Built-in Categories and user Queues: create, remove, select
-- [ ] Start and stop a Queue
-- [ ] One active Download per Queue; five Passes
-- [ ] Queue Start time, End time, Reverse, Speed dial
-- [ ] Queue wait
-- [ ] Move items up and down; multi-selection
-- [ ] Move items between Categories from the context menu
-- [ ] After-download shutdown, for Queue and single Download. Mac change: no root password
-- [ ] Per-Download Start time and End time
+- [x] Built-in Categories and user Queues: create, remove, select
+- [x] Start and stop a Queue
+- [x] One active Download per Queue; five Passes
+- [x] Queue Start time, End time, Reverse, Speed dial
+- [x] Queue wait
+- [x] Move items up and down; multi-selection
+- [x] Move items between Categories from the context menu
+- [x] After-download shutdown, for Queue and single Download. Mac change: no root password
+- [x] Per-Download Start time and End time
 
 ## Main window
 
 - [x] Toolbar with actions that follow the selected Download's status
 - [x] Side panel with Category list
-- [ ] Side panel Queue options (step 4)
+- [x] Side panel Queue options
 - [x] Table with 11 toggleable columns and saved widths
 - [x] Sort by name, size, status, first try date, last try date
 - [x] Multiple selection and context menu
@@ -59,7 +59,7 @@ Full rules in [queue-and-schedule.md](queue-and-schedule.md).
 - [x] Remove from list; delete files; clear list; move files to another folder
 - [x] Properties window: edit a stopped Download's options
 - [x] Progress window per Download: live labels, controls, Speed dial
-- [ ] Progress window: After-download shutdown (step 4)
+- [x] Progress window: After-download shutdown
 - [x] After-download dialog: open file, open folder, "don't show again"
 - [ ] Log window with copy and report actions
 - [ ] About, Help, Report Issue, new-version check

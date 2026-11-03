@@ -1,5 +1,8 @@
 # Queue and schedule behaviour
 
+Swiftpolis's differences are under [The Swift implementation](#the-swift-implementation). What real
+Persepolis did when run is in [persepolis-observed.md](persepolis-observed.md).
+
 What Persepolis does today, from `persepolis/scripts/queue.py`,
 `persepolis_lib_prime.py`, `shutdown.py` and `mainwindow.py`. Swiftpolis keeps these
 rules and fixes the items marked **defect**, detailed in
@@ -171,3 +174,24 @@ Scheduled" notification and a Spider request to fill in name and size straight a
 Set in Preferences as hours and minutes (`settings/wait-queue`, default `[0, 0]`). It
 applies to every Queue. It is implemented as a Start time, so it inherits the same
 equality matching and can be missed in the same way.
+
+## The Swift implementation
+
+`DownloadCoordinator` runs Queues, and `ScheduledDownload` adds times to any engine. Every rule above
+has a test against a fake clock and engines. It keeps the rules above, except for these:
+
+| Persepolis | Swiftpolis | Why |
+| --- | --- | --- |
+| Compares the clock with a minute | Works out real moments up front | D1, and Q17's missed-window rule |
+| The End time is one clock time per item | One moment for the whole run | A Queue's window stays the same whichever item is running |
+| A window missed while asleep can't happen | The Queue stops and says why | Q17 |
+| Writes Start and End times onto queued items | Passes them to the run only | They only matter during it, and they'd be cleared at launch anyway |
+| Reverse and the dial come from shared widgets | Saved per Queue when it starts; a dial per running Queue | D9 |
+| Sleeps 3 seconds after starting each item | Spends at least 3 seconds per item | Same pacing, and a long item isn't made to wait |
+| An End time reports twice | Reports once | D29 |
+| Root password and `sudo shutdown` | `System Events` shutdown request | Q5 and D10 |
+| Stop All can still lead to a pending shutdown of a Single Download | Stop All cancels it | Someone stopping everything doesn't want a shutdown |
+| Move up with a selection at the top reorders that selection | The selection stays together | Standard behaviour for a list |
+
+An End-time stop still performs a requested shutdown, as in Persepolis. Someone leaving a Queue to run
+overnight wants the Mac off afterwards, whether it finished or ran out of time.

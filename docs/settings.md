@@ -13,7 +13,7 @@ each one: native Mac behaviour, without the Qt style settings.
 | `timeout` | 10 | Timeout (s) | Keep |
 | `connections` | 64 | Number of connections | Keep |
 | `chunk-size` | 100 | Chunk size (KiB) | Keep |
-| `wait-queue` | `[0, 0]` | Queue wait (h, m) | Keep |
+| `wait-queue` | `[0, 0]` | Queue wait (h, m) | Keep, as separate hours and minutes |
 | `dont-check-certificate` | `no` | Don't verify peers | Keep |
 
 ## Torrent tab (`test` branch)

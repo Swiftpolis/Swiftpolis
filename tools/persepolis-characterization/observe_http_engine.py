@@ -77,6 +77,8 @@ class Handler(BaseHTTPRequestHandler):
             log.ports.add(self.client_address[1])
             log.requests.append({
                 'method': self.command,
+                'path': parsed.path,
+                'time': time.time(),
                 'range': self.headers.get('Range'),
                 'headers': {k.lower(): v for k, v in self.headers.items()},
             })

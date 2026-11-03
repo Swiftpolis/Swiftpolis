@@ -10,6 +10,12 @@ final class DownloadProgressViewModel {
     var speedDial = Double(SpeedDialLabel.maximum) {
         didSet { applySpeedDial() }
     }
+    var shutsDownAfterwards = false {
+        didSet {
+            let isOn = shutsDownAfterwards
+            Task { await services.coordinator.setShutdownAfterDownload(isOn, for: gid) }
+        }
+    }
     private(set) var link = ""
     private(set) var savedName: String?
 
