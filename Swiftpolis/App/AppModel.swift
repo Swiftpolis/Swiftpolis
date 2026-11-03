@@ -101,7 +101,7 @@ final class AppModel {
                 secrets: secrets,
                 queueWait: { store.preferences.queueWait },
                 shutDown: { await AppModel.shared.shutDownSystem() },
-                makeEngine: { request, secrets in
+                makeEngine: { _, request, secrets in
                     let settings = store.preferences.engineSettings
                     switch request.engine {
                     case .http:

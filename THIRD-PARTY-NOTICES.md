@@ -11,9 +11,10 @@ Swiftpolis is free software under the GNU General Public License, version 3. See
   helper are based on it.
   <https://github.com/persepolisdm/Persepolis-WebExtension>
 
-## Programs included in the app
+## Programs included in the Mac app
 
-These run as separate programs for Video Finder. `tools/fetch-helpers.sh` pins their versions.
+These run as separate programs for Video Finder, which the iPhone and iPad app doesn't have.
+`tools/fetch-helpers.sh` pins their versions.
 
 - **yt-dlp**, the Unlicense. Its standalone macOS build also bundles Python and other components under
   their own licenses, some of them GPLv3+.

@@ -24,6 +24,10 @@ NativeHost/                        The helper Chrome and Firefox start
 SafariExtension/                   Safari's handler, and the extension's scripts in Resources/
 Helpers/                           The helpers' entitlements, and bin/, which fetch-helpers.sh fills
 
+SwiftpolisMobile/                  The iPhone and iPad app. See ADR 0010
+├── App/                           Entry point, and what the app shares
+└── Features/                      Downloads, AddLinks, Settings
+
 SwiftpolisKit/                     Local Swift package, in its own repository, as a Git submodule
 ├── Sources/
 │   ├── SwiftpolisBridge/          Shared with the helper and extension, so it stays small

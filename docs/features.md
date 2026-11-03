@@ -5,6 +5,21 @@ behind these, but the windows themselves are checked by hand, so see the note in
 [roadmap.md](roadmap.md) for what has been clicked through. "Mac change" marks a decided replacement of
 Persepolis's mechanism.
 
+## iPhone and iPad
+
+Built on the same kit, with what iOS rules out listed in
+[ADR 0010](adr/0010-ios-downloads-belong-to-the-system.md).
+
+- [x] Background downloads that survive suspension and the app being killed
+- [x] Add one link or a pasted list, with names looked up as you go
+- [x] Single Downloads and Queues, with Passes, Start time and order
+- [x] Pause, resume and stop, keeping progress when the server allows it
+- [x] Files in the Files app, with preview, share and Show in Files
+- [x] Notifications when a Download or Queue finishes
+- [x] iPad: sidebar, keyboard shortcuts, drag and drop of links
+- [ ] Safari extension, or a share sheet extension
+- [ ] Choosing another folder
+
 ## Adding downloads
 
 - [x] Add Link window: link, name, folder, Connections

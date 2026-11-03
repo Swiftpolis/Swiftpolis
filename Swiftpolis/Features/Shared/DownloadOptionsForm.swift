@@ -204,13 +204,3 @@ enum ScheduleNotes {
     static let text = "Times are forgotten if you quit Swiftpolis, and the Mac has to be awake to start on time. "
         + "If it's asleep, the download starts when it wakes, unless the end time has passed."
 }
-
-enum QueueNaming {
-    static func message(for error: Error, name: String) -> String {
-        switch error as? QueueNameError {
-        case .alreadyExists: "\"\(name)\" already exists!"
-        case .empty: "Enter a queue name."
-        case nil: error.localizedDescription
-        }
-    }
-}

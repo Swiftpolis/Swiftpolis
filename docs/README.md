@@ -3,7 +3,8 @@
 Swiftpolis is a native macOS rewrite of **Persepolis Download Manager** in Swift,
 SwiftUI and SwiftData, using MVVM, with an added Safari extension. The goal is
 feature parity with Persepolis, including its queue and schedule behaviour, on
-macOS 28 and later, where Rosetta 2 is no longer available for general Intel apps.
+macOS 28 and later, where Rosetta 2 is no longer available for general Intel apps. It also runs on iPhone and iPad,
+within what [iOS allows](adr/0010-ios-downloads-belong-to-the-system.md).
 
 - **Bundle ID:** `com.amirabravesh.Swiftpolis`
 - **Source of truth for behaviour:** Persepolis `5.2.0`, branch `test`, commit `8940bcf`
@@ -32,7 +33,7 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
 | [project-structure.md](project-structure.md) | Where the code is, file by file | Living |
 | [setup-and-build.md](setup-and-build.md) | Run the tests and the app; the project file format | Living |
 | [roadmap.md](roadmap.md) | Build order and the early checks in each step | Living |
-| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0009 | Living |
+| [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0010 | Living |
 
 "From source" docs describe what Persepolis does, found by reading its code, and they
 are not a Swiftpolis design. Where one disagrees with

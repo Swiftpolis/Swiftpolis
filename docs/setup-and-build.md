@@ -41,6 +41,16 @@ loopback and take about 15 seconds. Three of them run the real yt-dlp, if the he
 
 The first real download into `~/Downloads` may make macOS ask for permission to use that folder.
 
+## Run on iPhone and iPad
+
+Run the `SwiftpolisMobile` scheme. It doesn't use the helpers. To install it on a device, choose a team under
+Signing & Capabilities. A free personal team's install lasts 7 days, and a paid one's lasts as long as its
+profile, on devices registered with it.
+
+The tests can't cover what the system does with the app gone. To check that on a simulator, start some downloads
+from a slow server, and end the app with `kill -9`. Don't swipe it away, as iOS takes that as the person quitting
+it, and cancels its downloads. The files should still arrive, and the app should wake by itself to collect them.
+
 ## Publish a release
 
 The update check reads the latest release on GitHub. Set `ProjectLinks.owner` in
