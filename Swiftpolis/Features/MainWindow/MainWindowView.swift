@@ -66,8 +66,13 @@ private struct DownloadsSplitView: View {
                 Text(category.name)
             }
             .safeAreaInset(edge: .bottom) {
-                if viewModel.isQueueSelected {
-                    QueuePanel(viewModel: viewModel)
+                VStack(spacing: 0) {
+                    if let status = viewModel.selectedPairStatus {
+                        VideoPairPanel(status: status) { viewModel.muxSelectedPair() }
+                    }
+                    if viewModel.isQueueSelected {
+                        QueuePanel(viewModel: viewModel)
+                    }
                 }
             }
             .navigationSplitViewColumnWidth(min: 230, ideal: 250)
@@ -217,6 +222,7 @@ private struct DownloadsSplitView: View {
         let actions = viewModel.actions
         ToolbarItemGroup(placement: .primaryAction) {
             Button("Add New Download Link", systemImage: "plus") { openWindow(id: WindowID.addLink) }
+            Button("Find Video Links...", systemImage: "film") { openWindow(id: WindowID.videoFinder) }
             Button("Resume Download", systemImage: "play") { viewModel.resume() }
                 .disabled(!actions.canResume)
             Button("Pause Download", systemImage: "pause") { viewModel.pause() }
@@ -263,6 +269,30 @@ private struct DownloadsSplitView: View {
                 Button("Clear Download List") { isConfirmingClear = true }
             }
         }
+    }
+}
+
+/// The side panel's account of the selected Video pair.
+private struct VideoPairPanel: View {
+    let status: VideoPairStatus
+    let mux: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Video Finder").bold()
+            Text("Status: \(status.activity)")
+            Text("Muxing status: \(status.muxing)")
+            Text("Video file status: \(status.video)")
+            Text("Audio file status: \(status.audio)")
+            if status.canMux {
+                Button("Start Mixing", action: mux)
+                    .frame(maxWidth: .infinity)
+            }
+        }
+        .font(.callout)
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(.bar)
     }
 }
 

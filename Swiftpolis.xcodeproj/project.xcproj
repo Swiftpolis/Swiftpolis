@@ -74,6 +74,13 @@
           "name": "Embed Native Host",
           "bundle-base-path": "executables-directory",
         },
+        {
+          "kind": "script",
+          "name": "Embed Helpers",
+          "log-environment-variables": true,
+          "shell": "/bin/sh",
+          "script": "tools/embed-helpers.sh\n",
+        },
       ],
       "package-product-members": [
         {
@@ -104,6 +111,7 @@
         "ENABLE_APP_SANDBOX": "NO",
         "ENABLE_HARDENED_RUNTIME": "YES",
         "ENABLE_PREVIEWS": "YES",
+        "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         "GENERATE_INFOPLIST_FILE": "YES",
         "INFOPLIST_FILE": "Swiftpolis-Info.plist",
         "INFOPLIST_KEY_NSAppleEventsUsageDescription": "Swiftpolis asks System Events to shut down your Mac when a queue or download you chose finishes.",

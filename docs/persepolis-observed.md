@@ -137,6 +137,37 @@ the real program the exact message its extension sends.
 for the Add Link window has `load_cookies: null`, with no cookies anywhere. The URL, referrer and user agent
 all came through. The reply was `{"enable": true, "version": "1.85"}`.
 
+## yt-dlp's options
+
+Run with Persepolis's own `venv` (yt-dlp 2025.11.12), against a local server that logs each request. Persepolis's
+option names and the real ones were each given the same values.
+
+| Options | Cookie | Referer | User agent |
+| --- | --- | --- | --- |
+| Persepolis's (`cookies`, `referer`, `user-agent`) | none | none | yt-dlp's default Chrome string |
+| The real ones (`cookiefile`, `http_headers`) | sent | sent | sent |
+
+So **D31 is confirmed.** The options that do work are `retries`, `socket_timeout`, `outtmpl`, `noplaylist`, `proxy`,
+`username` and `password`.
+
+## Early checks for Video
+
+Run with the helpers signed for the hardened runtime, the way the app ships them.
+
+| Check | Result |
+| --- | --- |
+| Signed helpers run | **Yes.** yt-dlp takes 12 s on its first start and about 5 s after, because it unpacks itself each time. Deno runs |
+| yt-dlp updates itself outside the app | **Yes.** 2026.10.21, as downloaded, updated itself to 2026.10.26 from a plain folder. The result is ad-hoc signed, has no quarantine flag and runs. A second `--update` says it's up to date |
+| The minimal ffmpeg remuxes | **Yes.** mp4 with m4a, webm with webm into mkv, and both mixed combinations came out with the right codecs |
+| The minimal ffmpeg fixes up HLS | **Yes.** With nothing else on `PATH`, a real HLS stream came out as a valid mp4 |
+| Progress lines | One JSON object a line. Fragmented streams give `fragment_index`, `fragment_count` and `total_bytes_estimate`, and plain ones `total_bytes` |
+| A direct stream link | **Works,** which is how Persepolis uses it. yt-dlp's generic extractor takes the HLS playlist link |
+| YouTube without a login | **Comes and goes.** The same Mac got "Sign in to confirm you're not a bot" and, later, a full format list with Best quality, then the refusal again |
+| Vimeo, SoundCloud | Vimeo asks for a login. The SoundCloud link tried was a 404 |
+| Dailymotion | **Works.** Two combined `m3u8_native` formats, with no separate streams |
+
+**Not yet checked:** that the helpers survive notarization, because this Mac has no Developer ID certificate.
+
 ## Early checks for the Swift engine
 
 Run on the same day with throwaway programs.

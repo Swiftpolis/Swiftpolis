@@ -18,6 +18,11 @@ final class DownloadProgressViewModel {
     }
     private(set) var link = ""
     private(set) var savedName: String?
+    private(set) var engine = DownloadEngineKind.http
+    /// Set if this window is following a Video pair, which runs one stream after the other.
+    private(set) var pair: VideoPair?
+    private var isVideoComplete = false
+    private var isAudioComplete = false
 
     let gid: GID
     private let model: AppModel
@@ -33,12 +38,50 @@ final class DownloadProgressViewModel {
         let download = try? await services.library.download(gid)
         link = download?.request.link ?? ""
         savedName = download?.fileName
+        engine = download?.request.engine ?? .http
+        await reloadPair()
     }
 
-    private var snapshot: DownloadSnapshot? { model.snapshots[gid] }
+    /// Picks up what has finished so far. The list changes whenever a stream ends.
+    func reloadPair() async {
+        guard let found = try? await services.library.videoPair(containing: gid) else {
+            // Muxing has finished, so there's no pair any more, and nothing left to follow.
+            pair = nil
+            return
+        }
+        pair = found
+        isVideoComplete = (try? await services.library.download(found.videoGID))??.status == .complete
+        isAudioComplete = (try? await services.library.download(found.audioGID))??.status == .complete
+    }
+
+    private var currentGID: GID {
+        guard let pair else { return gid }
+        return model.snapshots[pair.audioGID] != nil ? pair.audioGID : pair.videoGID
+    }
+
+    private var snapshot: DownloadSnapshot? { model.snapshots[currentGID] }
 
     /// Whether the Download has a session. Once it doesn't, its progress window closes.
-    var isRunning: Bool { snapshot != nil }
+    var isRunning: Bool {
+        if let pair, model.activePairs.contains(pair.videoGID) { return true }
+        return snapshot != nil
+    }
+
+    var canSetSpeed: Bool { engine == .http }
+    var connectionsLabel: String { engine == .http ? "Connections" : "Fragments" }
+
+    var videoStatus: String { streamStatus(isComplete: isVideoComplete, isCurrent: currentGID == pair?.videoGID) }
+    var audioStatus: String { streamStatus(isComplete: isAudioComplete, isCurrent: currentGID == pair?.audioGID) }
+
+    private func streamStatus(isComplete: Bool, isCurrent: Bool) -> String {
+        if isComplete { return "Completed" }
+        if isCurrent, let snapshot { return "\(snapshot.percent)% downloaded" }
+        return "Not completed"
+    }
+
+    var muxingStatus: String {
+        isVideoComplete && isAudioComplete ? "Started!" : "Not started!"
+    }
 
     var title: String {
         let name = snapshot?.fileName ?? savedName ?? "Download"
@@ -56,7 +99,7 @@ final class DownloadProgressViewModel {
 
     var rate: String { snapshot.map { ByteFormat.speed($0.bytesPerSecond) } ?? "" }
     var timeLeft: String { snapshot?.secondsRemaining.map(DurationFormat.remaining(seconds:)) ?? "" }
-    var connections: String { snapshot.map { String($0.activeConnections) } ?? "" }
+    var connections: String { snapshot.map { $0.fragments ?? String($0.activeConnections) } ?? "" }
 
     /// `nil` when progress can't be measured yet, which shows as a busy bar.
     var fraction: Double? {
@@ -65,7 +108,7 @@ final class DownloadProgressViewModel {
     }
 
     var canResume: Bool { snapshot?.status == .paused }
-    var canPause: Bool { snapshot?.status == .downloading }
+    var canPause: Bool { snapshot?.status == .downloading && engine == .http }
     var canStop: Bool { snapshot != nil && snapshot?.status != .stopped }
 
     var speedLabel: String { SpeedDialLabel.text(for: Int(speedDial)) }

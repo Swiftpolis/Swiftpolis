@@ -17,6 +17,9 @@ import SwiftpolisServices
 /// - `SWIFTPOLIS_DEBUG_SHARED_INBOX`: when set, reads the real shared inbox instead of a throwaway one.
 /// - `SWIFTPOLIS_DEBUG_QUEUE`: links to add to Scheduled Downloads, separated by commas, before starting
 ///   it and showing it in the main window.
+/// - `SWIFTPOLIS_DEBUG_VIDEO`: a link to open in Video Finder and fetch straight away.
+/// - `SWIFTPOLIS_DEBUG_VIDEO_SUBMIT`: when set, Video Finder also presses OK once it has the formats.
+/// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
 
@@ -28,6 +31,18 @@ enum DebugAutomation {
         return CategoryKind.scheduledDownloadsName
     }
 
+    static var fetchesVideoLinks: Bool {
+        isActive && ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_VIDEO"] != nil
+    }
+
+    static var submitsVideoFinder: Bool {
+        isActive && ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_VIDEO_SUBMIT"] != nil
+    }
+
+    static var updatesHelpers: Bool {
+        isActive && ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_UPDATE"] != nil
+    }
+
     nonisolated static func environment() -> AppDependencies.Environment? {
         guard let data = ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] else { return nil }
         let defaults = UserDefaults(suiteName: "SwiftpolisDebug-\(abs(data.hashValue))") ?? .standard
@@ -36,13 +51,15 @@ enum DebugAutomation {
         preferences.downloadFolder = data + "/Downloads"
         preferences.startsBrowserRequestsImmediately = ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_IMMEDIATE"] != nil
         store.preferences = preferences
+        let dataFolder = URL(filePath: data, directoryHint: .isDirectory)
         return AppDependencies.Environment(
-            dataFolder: URL(filePath: data, directoryHint: .isDirectory),
+            dataFolder: dataFolder,
             preferences: store,
             secrets: InMemorySecretStore(),
             inbox: ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_SHARED_INBOX"] != nil
                 ? BrowserInbox.shared
-                : BrowserInbox(folder: URL(filePath: data + "/Inbox", directoryHint: .isDirectory))
+                : BrowserInbox(folder: URL(filePath: data + "/Inbox", directoryHint: .isDirectory)),
+            helpers: AppDependencies.helpers(in: dataFolder)
         )
     }
 
@@ -59,6 +76,9 @@ enum DebugAutomation {
             let model = AppModel.shared
             for id in (environment["SWIFTPOLIS_DEBUG_OPEN"] ?? "").split(separator: ",") {
                 model.openWindowAction?(id: String(id))
+            }
+            if let link = environment["SWIFTPOLIS_DEBUG_VIDEO"] {
+                model.showVideoFinder(for: BrowserLink(url: link))
             }
             if let links = environment["SWIFTPOLIS_DEBUG_QUEUE"], let services = model.services {
                 for link in links.split(separator: ",") {

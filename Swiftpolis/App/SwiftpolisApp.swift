@@ -22,6 +22,15 @@ struct SwiftpolisApp: App {
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
 
+        WindowGroup("Video Finder", id: WindowID.videoFinder, for: String.self) { $key in
+            if let services = model.services {
+                VideoFinderView(model: model, services: services, waitingKey: key)
+            }
+        }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(.suppressed)
+        .restorationBehavior(.disabled)
+
         WindowGroup("Add Links", id: WindowID.batchAdd, for: String.self) { $key in
             if let services = model.services, let key, let links = model.waitingBatch(key) {
                 BatchAddView(model: model, services: services, links: links)
@@ -77,6 +86,7 @@ struct AppCommands: Commands {
         CommandGroup(replacing: .newItem) {
             Button("Add New Download Link") { openWindow(id: WindowID.addLink) }
                 .keyboardShortcut("n")
+            Button("Find Video Links...") { openWindow(id: WindowID.videoFinder) }
             Divider()
             Button("Stop All Active Downloads") {
                 Task { await model.services?.coordinator.stopAll() }

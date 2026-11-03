@@ -9,3 +9,7 @@ DerivedData/
 # Swift Package Manager
 .build/
 .swiftpm/
+
+# Built by tools/fetch-helpers.sh
+Helpers/bin/
+Helpers/work/

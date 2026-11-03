@@ -23,14 +23,13 @@ final class AddLinkViewModel {
     private let services: AppModel.Services
     private var spiderTask: Task<Void, Never>?
     private var pendingStart = false
-    private static let defaults = UserDefaults.standard
 
     init(model: AppModel, services: AppModel.Services, browserLink: BrowserLink?) {
         self.model = model
         self.services = services
         var draft = browserLink.map { DownloadDraft(preferences: model.preferences, browserLink: $0) }
             ?? DownloadDraft(preferences: model.preferences)
-        Self.restoreRememberedOptions(into: &draft)
+        RememberedOptions.restore(into: &draft)
         self.draft = draft
         lookUpLink()
     }
@@ -116,7 +115,7 @@ final class AddLinkViewModel {
     }
 
     private func add(startNow: Bool) async -> Bool {
-        rememberOptions()
+        RememberedOptions.remember(from: draft)
         do {
             let gid = try await services.coordinator.add(
                 draft.request,
@@ -131,28 +130,6 @@ final class AddLinkViewModel {
         } catch {
             model.notify("Operation was not successful.", body: error.localizedDescription, sound: .fail)
             return false
-        }
-    }
-
-    // MARK: Remembered options
-
-    /// Persepolis offers the last-used proxy and login again, but never their passwords.
-    private func rememberOptions() {
-        let defaults = Self.defaults
-        defaults.set(draft.proxyHost, forKey: "addLink.proxyHost")
-        defaults.set(draft.proxyPort, forKey: "addLink.proxyPort")
-        defaults.set(draft.proxyUser, forKey: "addLink.proxyUser")
-        defaults.set(draft.proxyKind.rawValue, forKey: "addLink.proxyKind")
-        defaults.set(draft.loginUser, forKey: "addLink.loginUser")
-    }
-
-    private static func restoreRememberedOptions(into draft: inout DownloadDraft) {
-        draft.proxyHost = defaults.string(forKey: "addLink.proxyHost") ?? ""
-        draft.proxyPort = defaults.integer(forKey: "addLink.proxyPort")
-        draft.proxyUser = defaults.string(forKey: "addLink.proxyUser") ?? ""
-        draft.loginUser = defaults.string(forKey: "addLink.loginUser") ?? ""
-        if let kind = defaults.string(forKey: "addLink.proxyKind").flatMap(ProxySettings.Kind.init(rawValue:)) {
-            draft.proxyKind = kind
         }
     }
 }

@@ -58,7 +58,9 @@ windows open, or none.
 | `queue.py` | `DownloadCoordinator`'s Queue section |
 | Clock loops in each engine | `ScheduledDownload`, which wraps any engine |
 | `persepolis_lib_prime.py` | `HTTPDownloadEngine` |
-| `ytdlp_downloader.py`, `video_finder.py` | `YtDlpEngine`, `VideoPairCoordinator` |
+| `ytdlp_downloader.py` | `YtDlpEngine` |
+| `video_finder.py`, `muxer` | `DownloadCoordinator`'s Video pairs section, then `VideoMuxer` |
+| `video_finder_addlink.py` | `VideoFinderViewModel`, `VideoFinderDraft`, `VideoFormats` |
 | `libtorrent_wrapper.py` | `TorrentEngine` ([Q8](open-questions.md)) |
 | `data_base.py` | `@Model` types and repositories |
 | `QSettings` | `SettingsStore` |

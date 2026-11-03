@@ -1,4 +1,5 @@
 import AppKit
+import SwiftpolisEngines
 import SwiftpolisServices
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -25,6 +26,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// With "hide window on close" on, closing the window leaves the app running in the menu bar.
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
         !AppModel.shared.preferences.hidesWindowOnClose
+    }
+
+    /// A helper would otherwise carry on with nobody listening to it.
+    func applicationWillTerminate(_ notification: Notification) {
+        HelperProcess.terminateAll()
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

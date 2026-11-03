@@ -22,6 +22,7 @@ Swiftpolis/                        App target: SwiftUI only
 
 NativeHost/                        The helper Chrome and Firefox start
 SafariExtension/                   Safari's handler, and the extension's scripts in Resources/
+Helpers/                           The helpers' entitlements, and bin/, which fetch-helpers.sh fills
 
 SwiftpolisKit/                     Local Swift package
 ├── Sources/
@@ -34,6 +35,7 @@ SwiftpolisKit/                     Local Swift package
 │   │   ├── ClockTime.swift            Times of day and their next occurrence
 │   │   ├── CategoryKind.swift         Built-in Categories and Queue naming rules
 │   │   ├── LibraryValues.swift        Requests, options and summaries
+│   │   ├── Video.swift                Engine kinds, Video pairs, Video Finder's sites
 │   │   ├── DownloadActions.swift      What each status allows, and sort orders
 │   │   ├── Schedule.swift             Schedule windows and the Queue wait
 │   │   ├── Formatting.swift           Sizes, speeds and times as text
@@ -50,11 +52,17 @@ SwiftpolisKit/                     Local Swift package
 │   │   ├── ControlFile.swift          The .persepolis format and the resume decision
 │   │   ├── FileNaming.swift           File names, unique names and subfolders
 │   │   ├── HeaderProbe.swift          The HEAD request, and the Spider
-│   │   └── RequestRules.swift         Header and cookie text, retry and Speed dial rules
+│   │   ├── RequestRules.swift         Header and cookie text, retry and Speed dial rules
+│   │   ├── HelperProcess.swift        Runs a bundled program, and stops it
+│   │   ├── YtDlpEngine.swift          The yt-dlp engine, finding formats, and Muxing
+│   │   ├── YtDlpRules.swift           Progress lines, options, partial files, muxed names
+│   │   └── VideoFormats.swift         What yt-dlp found, as Video Finder's lists
 │   ├── SwiftpolisServices/
 │   │   ├── DownloadCoordinator.swift  Runs Downloads and Queues, and applies who-may-do-what rules
 │   │   ├── ScheduledDownload.swift    Adds a Start time and End time to any engine
 │   │   ├── DownloadDraft.swift        What the add windows edit; browser routing; helper manifests
+│   │   ├── VideoFinderDraft.swift     What Video Finder edits; browser requests' routing
+│   │   ├── HelperInstallation.swift   Where the helpers are; keeping yt-dlp current
 │   │   ├── Preferences.swift          Preferences and where they're stored
 │   │   └── SecretStore.swift          Passwords, in the Keychain
 │   └── SwiftpolisTestSupport/
@@ -71,6 +79,8 @@ SwiftpolisKit/                     Local Swift package
 Swiftpolis.entitlements            System Events, and the App Group
 Swiftpolis-Info.plist              The swiftpolis:// link
 tools/
+├── fetch-helpers.sh               Downloads yt-dlp and Deno, and builds ffmpeg
+├── embed-helpers.sh               The build phase that puts them in the app
 └── persepolis-characterization/   Runs real Persepolis against a test server
 docs/                              This documentation
 ```

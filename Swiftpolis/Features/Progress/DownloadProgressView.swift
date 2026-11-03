@@ -6,7 +6,10 @@ struct DownloadProgressView: View {
     @State private var hasStarted = false
     @Environment(\.dismiss) private var dismiss
 
+    private let model: AppModel
+
     init(model: AppModel, services: AppModel.Services, gid: GID) {
+        self.model = model
         _viewModel = State(initialValue: DownloadProgressViewModel(model: model, services: services, gid: gid))
     }
 
@@ -18,7 +21,12 @@ struct DownloadProgressView: View {
                 row("Downloaded", viewModel.downloaded)
                 row("Transfer rate", viewModel.rate)
                 row("Estimated time left", viewModel.timeLeft)
-                row("Connections", viewModel.connections)
+                row(viewModel.connectionsLabel, viewModel.connections)
+                if viewModel.pair != nil {
+                    row("Video file status", viewModel.videoStatus)
+                    row("Audio file status", viewModel.audioStatus)
+                    row("Muxing status", viewModel.muxingStatus)
+                }
             }
 
             if let fraction = viewModel.fraction {
@@ -27,9 +35,11 @@ struct DownloadProgressView: View {
                 ProgressView().progressViewStyle(.linear)
             }
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(viewModel.speedLabel).font(.callout)
-                Slider(value: $viewModel.speedDial, in: 0...Double(SpeedDialLabel.maximum), step: 1)
+            if viewModel.canSetSpeed {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(viewModel.speedLabel).font(.callout)
+                    Slider(value: $viewModel.speedDial, in: 0...Double(SpeedDialLabel.maximum), step: 1)
+                }
             }
 
             Toggle("Shut down the Mac when this download finishes", isOn: $viewModel.shutsDownAfterwards)
@@ -45,6 +55,7 @@ struct DownloadProgressView: View {
         .frame(width: 480)
         .navigationTitle(viewModel.title)
         .task { await viewModel.load() }
+        .task(id: model.listRevision) { await viewModel.reloadPair() }
         .onChange(of: viewModel.isRunning, initial: true) { _, isRunning in
             // Nothing to show once the session ends. It can take a moment to begin, though.
             if isRunning {

@@ -2,6 +2,17 @@
 
 Needs Xcode 27.2 or later on an Apple silicon Mac running macOS 27.
 
+## Get the helpers
+
+Video Finder needs yt-dlp, Deno and ffmpeg, and they aren't in the repository. This puts them in `Helpers/bin/`:
+
+```bash
+tools/fetch-helpers.sh
+```
+
+It takes a few minutes, because it builds ffmpeg from source, which only needs Xcode's command-line tools.
+Without it the app still builds, with a warning, and everything but Video Finder works.
+
 ## Run the tests
 
 ```bash
@@ -9,7 +20,7 @@ cd SwiftpolisKit && swift test
 ```
 
 Tests cover the package. Views are checked by running the app. Engine tests run against a server on
-loopback and take about 15 seconds. One test writes a throwaway item to your login Keychain and removes it.
+loopback and take about 15 seconds. Three of them run the real yt-dlp, if the helpers are there. One test writes a throwaway item to your login Keychain and removes it.
 
 The first real download into `~/Downloads` may make macOS ask for permission to use that folder.
 

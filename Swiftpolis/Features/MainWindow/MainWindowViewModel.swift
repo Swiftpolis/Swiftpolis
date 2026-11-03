@@ -7,6 +7,15 @@ import SwiftpolisServices
 import SwiftpolisPersistence
 import SwiftUI
 
+/// What the side panel shows about a Video pair.
+struct VideoPairStatus {
+    let activity: String
+    let muxing: String
+    let video: String
+    let audio: String
+    let canMux: Bool
+}
+
 /// One line of the main table, as display text.
 struct DownloadRow: Identifiable, Hashable {
     let id: GID
@@ -27,6 +36,7 @@ struct DownloadRow: Identifiable, Hashable {
 final class MainWindowViewModel {
     private(set) var categories: [CategorySummary] = []
     private(set) var downloads: [DownloadSummary] = []
+    private(set) var pairs: [VideoPair] = []
     var selectedCategoryName = CategoryKind.allDownloadsName
     var selection: Set<GID> = []
 
@@ -56,6 +66,7 @@ final class MainWindowViewModel {
         do {
             categories = try await library.categories()
             downloads = try await library.downloads(in: selectedCategoryName)
+            pairs = try await library.videoPairs()
             selection.formIntersection(downloads.map(\.gid))
         } catch {
             model.notify("Can't read your downloads", body: error.localizedDescription, sound: .fail)
@@ -79,7 +90,7 @@ final class MainWindowViewModel {
             size: total.map(ByteFormat.size) ?? unknown,
             downloaded: downloaded > 0 ? ByteFormat.size(downloaded) : unknown,
             percent: percent.map { "\($0)%" } ?? unknown,
-            connections: live.map { String($0.activeConnections) } ?? unknown,
+            connections: live.map { $0.fragments ?? String($0.activeConnections) } ?? unknown,
             rate: live.map { ByteFormat.speed($0.bytesPerSecond) } ?? unknown,
             timeLeft: live?.secondsRemaining.map(DurationFormat.remaining(seconds:)) ?? unknown,
             firstTry: Self.dateFormatter.string(from: download.firstTryDate),
@@ -105,7 +116,55 @@ final class MainWindowViewModel {
     var actions: DownloadActions {
         guard let download = selectedDownload else { return DownloadActions() }
         let status = model.snapshots[download.gid]?.status ?? download.status
-        return DownloadActions(status: status, category: download.category)
+        return DownloadActions(status: status, category: download.category, engine: download.request.engine)
+    }
+
+    // MARK: Video pairs
+
+    private var selectedPair: VideoPair? {
+        selectedDownload.flatMap { download in pairs.first { $0.contains(download.gid) } }
+    }
+
+    /// What the side panel says about the selected Video pair. `nil` if one isn't selected.
+    var selectedPairStatus: VideoPairStatus? {
+        guard let pair = selectedPair else { return nil }
+        let isActive = model.activePairs.contains(pair.videoGID)
+        let isVideoComplete = status(of: pair.videoGID) == .complete
+        let isAudioComplete = status(of: pair.audioGID) == .complete
+
+        let muxing: String
+        switch pair.muxingStatus {
+        case .notStarted: muxing = "Not Active"
+        case .muxing: muxing = "Started"
+        case .error: muxing = "Error"
+        case .complete: muxing = "Complete"
+        }
+        return VideoPairStatus(
+            activity: isActive ? "Active" : "Not Active",
+            muxing: muxing,
+            video: streamText(pair.videoGID),
+            audio: streamText(pair.audioGID),
+            canMux: isVideoComplete && isAudioComplete && !isActive
+        )
+    }
+
+    private func status(of gid: GID) -> DownloadStatus? {
+        model.snapshots[gid]?.status ?? downloads.first { $0.gid == gid }?.status
+    }
+
+    private func streamText(_ gid: GID) -> String {
+        if status(of: gid) == .complete { return "Completed" }
+        let download = downloads.first { $0.gid == gid }
+        let live = model.snapshots[gid]
+        let percent = live?.percent ?? download.flatMap {
+            percentage($0.downloadedBytes, of: $0.totalBytes, status: $0.status)
+        } ?? 0
+        return "\(percent)% downloaded"
+    }
+
+    func muxSelectedPair() {
+        guard let gid = selectedDownload?.gid else { return }
+        control("mux") { try await $0.muxAgain(gid) }
     }
 
     // MARK: Control
@@ -146,6 +205,8 @@ final class MainWindowViewModel {
                 )
             } catch DownloadControlError.stillClosing {
                 model.notify("Please retry in a minute!", body: "be patient!", sound: .warning)
+            } catch DownloadControlError.pairInProgress {
+                model.notify("Download is in progress by video finder!", body: "be patient!", sound: .warning)
             } catch {
                 model.notify("Operation was not successful.", body: error.localizedDescription, sound: .fail)
             }
@@ -231,6 +292,8 @@ final class MainWindowViewModel {
                 model.notify(name, body: "Operation was not successful!", sound: .fail)
             case .queueRunning(let queue):
                 model.notify("Operation was not successful!", body: "Please stop the following category first: \(queue)", sound: .fail)
+            case .pairInProgress:
+                model.notify("Download is in progress by video finder!", body: "be patient!", sound: .warning)
             }
         }
     }

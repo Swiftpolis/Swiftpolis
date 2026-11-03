@@ -15,6 +15,7 @@ enum WindowID {
     static let properties = "properties"
     static let afterDownload = "after-download"
     static let batchAdd = "batch-add"
+    static let videoFinder = "video-finder"
 }
 
 /// What the whole app shares: the services, live progress and preferences.
@@ -41,6 +42,8 @@ final class AppModel {
     /// Goes up whenever a saved list changes, so anything showing one knows to reload it.
     private(set) var listRevision = 0
     private(set) var runningQueues: Set<String> = []
+    /// The Video pairs at work, known by their video stream.
+    private(set) var activePairs: Set<GID> = []
 
     var preferences: Preferences {
         didSet {
@@ -50,6 +53,7 @@ final class AppModel {
     }
 
     @ObservationIgnored let secrets: any SecretStore
+    @ObservationIgnored let helpers: HelperInstallation
     @ObservationIgnored var openWindowAction: OpenWindowAction?
 
     @ObservationIgnored private let preferencesStore: PreferencesStore
@@ -61,6 +65,7 @@ final class AppModel {
     /// links, so that cookies never become part of a window's saved state.
     @ObservationIgnored private var waitingAddLinks: [String: BrowserLink] = [:]
     @ObservationIgnored private var waitingBatches: [String: [BrowserLink]] = [:]
+    @ObservationIgnored private var waitingVideoLinks: [String: BrowserLink] = [:]
 
     private init() {
         let environment = AppDependencies.environment()
@@ -69,6 +74,7 @@ final class AppModel {
         secrets = environment.secrets
         dataFolder = environment.dataFolder
         inbox = environment.inbox
+        helpers = environment.helpers
     }
 
     var services: Services? {
@@ -76,12 +82,13 @@ final class AppModel {
         return nil
     }
 
-    var hasActiveDownloads: Bool { !snapshots.isEmpty || !runningQueues.isEmpty }
+    var hasActiveDownloads: Bool { !snapshots.isEmpty || !runningQueues.isEmpty || !activePairs.isEmpty }
 
     func start() async {
         guard case .starting = state else { return }
         do {
             let store = preferencesStore
+            let helpers = helpers
             let library = try AppDependencies.makeLibrary(in: dataFolder)
             try await library.prepareForLaunch()
             let coordinator = DownloadCoordinator(
@@ -90,10 +97,28 @@ final class AppModel {
                 queueWait: { store.preferences.queueWait },
                 shutDown: { await AppModel.shared.shutDownSystem() },
                 makeEngine: { request, secrets in
-                    HTTPDownloadEngine(request: request, secrets: secrets, settings: store.preferences.engineSettings)
+                    let settings = store.preferences.engineSettings
+                    switch request.engine {
+                    case .http:
+                        return HTTPDownloadEngine(request: request, secrets: secrets, settings: settings)
+                    case .ytDlp:
+                        return YtDlpEngine(request: request, secrets: secrets, settings: settings, helpers: helpers.paths)
+                    }
                 },
                 spider: { request, secrets in
                     await Spider.look(at: request, secrets: secrets, settings: store.preferences.engineSettings)
+                },
+                mux: { video, audio, folder in
+                    do throws(VideoMuxer.Failure) {
+                        return .success(try await VideoMuxer.mux(
+                            video: video,
+                            audio: audio,
+                            folder: VideoMuxer.folder(forDownloadIn: folder, settings: store.preferences.engineSettings),
+                            ffmpeg: helpers.paths.ffmpeg
+                        ))
+                    } catch {
+                        return .failure(error)
+                    }
                 }
             )
             state = .ready(Services(library: library, coordinator: coordinator))
@@ -101,6 +126,7 @@ final class AppModel {
             installBrowserHelpers()
             Task { await listen(to: coordinator) }
             Task { await watchClipboard() }
+            Task { await updateHelpers() }
             drainInbox()
         } catch {
             state = .failed(message: error.localizedDescription)
@@ -124,8 +150,26 @@ final class AppModel {
                 handleQueueFinished(outcome)
             case .shuttingDown:
                 notify("Swiftpolis is shutting down", body: "your system in 20 seconds", sound: .warning)
+            case .videoPairsChanged(let pairs):
+                activePairs = pairs
+                updateKeepAwake()
+            case .videoPairFinished(let result):
+                handlePairFinished(result)
             }
         }
+    }
+
+    /// Keeps yt-dlp up to date, in the background. This can take a while, and nothing waits for it.
+    private func updateHelpers() async {
+        #if DEBUG
+        guard !DebugAutomation.isActive || DebugAutomation.updatesHelpers else { return }
+        #endif
+        let store = preferencesStore
+        let helpers = helpers
+        let lastCheck = store.lastYtDlpUpdateCheck
+        store.lastYtDlpUpdateCheck = await Task.detached {
+            await helpers.updateIfDue(lastCheck: lastCheck)
+        }.value
     }
 
     // MARK: Links from elsewhere
@@ -153,7 +197,15 @@ final class AppModel {
     }
 
     private func handle(_ links: [BrowserLink]) {
-        switch BrowserRequestRoute(links: links, startsImmediately: preferences.startsBrowserRequestsImmediately) {
+        let plan = BrowserRequestPlan(
+            links: links,
+            startsImmediately: preferences.startsBrowserRequestsImmediately,
+            videoFinderMaxLinks: preferences.videoFinderMaxLinks
+        )
+        for link in plan.videoFinder {
+            showVideoFinder(for: link)
+        }
+        switch plan.route {
         case .addLink(let link):
             showAddLink(for: link)
         case .startNow(let link):
@@ -179,12 +231,22 @@ final class AppModel {
         NSApp.activate()
     }
 
+    func showVideoFinder(for link: BrowserLink) {
+        let key = UUID().uuidString
+        waitingVideoLinks[key] = link
+        openWindowAction?(id: WindowID.videoFinder, value: key)
+        NSApp.activate()
+    }
+
+    func waitingVideoLink(_ key: String) -> BrowserLink? { waitingVideoLinks[key] }
+
     func waitingAddLink(_ key: String) -> BrowserLink? { waitingAddLinks[key] }
     func waitingBatch(_ key: String) -> [BrowserLink]? { waitingBatches[key] }
 
     func forgetWaitingLinks(_ key: String) {
         waitingAddLinks[key] = nil
         waitingBatches[key] = nil
+        waitingVideoLinks[key] = nil
     }
 
     private func startNow(_ link: BrowserLink) {
@@ -210,7 +272,12 @@ final class AppModel {
         let links = LinkText.links(in: text).map { BrowserLink(url: $0) }
         switch links.count {
         case 0: break
-        case 1: showAddLink(for: links[0])
+        case 1:
+            if VideoSites.isSupported(links[0].url) {
+                showVideoFinder(for: links[0])
+            } else {
+                showAddLink(for: links[0])
+            }
         default: showBatch(for: links)
         }
     }
@@ -253,6 +320,8 @@ final class AppModel {
     /// Announces a finish. A Queue reports on itself, so this is for Single Downloads only.
     private func handleFinished(_ download: FinishedDownload) {
         guard CategoryKind(categoryName: download.category) == .singleDownloads else { return }
+        // A finished stream isn't the file yet. Its pair announces that.
+        if download.isVideoPairStream, download.status == .complete { return }
         let name = download.fileName ?? download.link
         switch download.status {
         case .complete:
@@ -268,6 +337,23 @@ final class AppModel {
             notify("Error - \(message)", body: name, sound: .fail)
         default:
             break
+        }
+    }
+
+    private func handlePairFinished(_ result: VideoPairResult) {
+        switch result.outcome {
+        case .complete(let fileName, _):
+            // As with any Download, a Queue reports on itself.
+            guard CategoryKind(categoryName: result.category) == .singleDownloads else { return }
+            notify("Download Complete", body: fileName, sound: .ok)
+            if preferences.showsAfterDownloadDialog {
+                openWindowAction?(id: WindowID.afterDownload, value: result.videoGID.rawValue)
+                NSApp.activate()
+            }
+        case .notEnoughSpace(let folder):
+            notify("Not enough free space in:", body: folder, sound: .fail)
+        case .muxingFailed:
+            notify("an error occurred", body: "muxing error", sound: .fail)
         }
     }
 

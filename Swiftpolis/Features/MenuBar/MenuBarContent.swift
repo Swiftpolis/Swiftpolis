@@ -12,6 +12,10 @@ struct MenuBarContent: View {
             openWindow(id: WindowID.addLink)
             NSApp.activate()
         }
+        Button("Find Video Links...") {
+            openWindow(id: WindowID.videoFinder)
+            NSApp.activate()
+        }
         Button("Stop All Active Downloads") {
             Task { await model.services?.coordinator.stopAll() }
         }

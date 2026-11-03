@@ -80,9 +80,10 @@ Config folder on macOS: `~/Library/Application Support/persepolis_download_manag
 
 ## The Swiftpolis model
 
-`SwiftpolisKit/Sources/SwiftpolisPersistence/LibrarySchema.swift` has two `@Model` types in a
-versioned schema: `CategoryRecord` and `DownloadRecord`. Video pair and torrent records arrive in
-the steps that need them. Views and ViewModels only ever see the plain summaries a repository
+`SwiftpolisKit/Sources/SwiftpolisPersistence/LibrarySchema.swift` holds the versioned schema, now at
+version 2: `CategoryRecord`, `DownloadRecord` and `VideoPairRecord`. Version 2 added the pair record and a
+Download's engine, by lightweight migration, and a test opens a real version 1 store. Version 1's types stay in
+the file, unchanged, because migration needs them. Torrent records arrive in the step that needs them. Views and ViewModels only ever see the plain summaries a repository
 returns ([ADR 0005](adr/0005-repositories-behind-viewmodels.md)).
 
 How it differs from the Persepolis schema:
@@ -92,6 +93,9 @@ How it differs from the Persepolis schema:
   position first, matching Persepolis's newest-first table. Sorting All Downloads changes only the
   second.
 - **All Downloads has no stored members.** It lists every Download.
+- **A Video pair holds only its two GIDs and the Muxing status.** Whether a stream is finished comes from its own
+  status, so `video_completed` and `audio_completed` have no column to disagree with it. `checking` becomes the
+  coordinator's in-memory run. `video_finder_db_table2` isn't stored at all, because a snapshot does its job.
 - **No display strings.** Sizes are stored in bytes, and an unknown size or name is `nil` rather
   than `***`.
 - **Live rate, ETA and Connections aren't stored.** Persepolis polls five times a second and writes

@@ -10,17 +10,28 @@ nonisolated enum AppDependencies {
         let preferences: PreferencesStore
         let secrets: any SecretStore
         let inbox: BrowserInbox?
+        let helpers: HelperInstallation
     }
 
     static func environment() -> Environment {
         #if DEBUG
         if let debug = DebugAutomation.environment() { return debug }
         #endif
+        let dataFolder = URL.applicationSupportDirectory.appending(path: "Swiftpolis", directoryHint: .isDirectory)
         return Environment(
-            dataFolder: URL.applicationSupportDirectory.appending(path: "Swiftpolis", directoryHint: .isDirectory),
+            dataFolder: dataFolder,
             preferences: PreferencesStore(),
             secrets: KeychainSecretStore(),
-            inbox: BrowserInbox.shared
+            inbox: BrowserInbox.shared,
+            helpers: helpers(in: dataFolder)
+        )
+    }
+
+    /// The helpers bundled with the app, and a folder for the one that updates itself.
+    static func helpers(in dataFolder: URL) -> HelperInstallation {
+        HelperInstallation(
+            bundledFolder: Bundle.main.bundleURL.appending(path: "Contents/Helpers", directoryHint: .isDirectory),
+            supportFolder: dataFolder.appending(path: "Helpers", directoryHint: .isDirectory)
         )
     }
 

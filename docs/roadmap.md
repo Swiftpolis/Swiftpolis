@@ -14,7 +14,20 @@ checklist of features is in [features.md](features.md).
 | 7. Torrents | libtorrent wrapper, magnet and file flows, file selection; then seeding | A torrent downloads with selected files, then seeds when enabled |
 | 8. Release | Persepolis import, 18 languages, shortcuts, remaining windows, notarized DMG | Everything in features.md is ticked |
 
-**Current state:** steps 1 to 5 are built.
+**Current state:** steps 1 to 6 are built. Step 6's "done when" isn't fully met: see below.
+
+**What step 6 has been through:** in the real app, with the helpers signed and bundled:
+
+- Separate streams from a local server were found, downloaded, muxed with the minimal ffmpeg, and came out as one
+  file with both tracks, and the streams removed. The Video Finder, progress and after-download windows were seen in
+  snapshots.
+- A real Dailymotion video, which is HLS only, downloaded in 18 seconds and came out as a valid mp4.
+- YouTube's format list and thumbnail appeared once. Two later tries got its "not a bot" refusal, so **no YouTube pair
+  has been downloaded yet.**
+
+The real yt-dlp also ran in tests against a local server: options arriving, stop and resume, and a 404.
+Pairs in a Queue, shutdown and failed Muxing have tests with stand-ins, and haven't run in the real app. **No
+notarized build exists,** because that needs a Developer ID certificate. Nobody has clicked the buttons yet.
 
 **What step 5 has been through:** a message in the exact browser format went through the real helper, the
 shared folder and the wake-up link to the running app, and the test server received the cookies, user agent
@@ -50,5 +63,7 @@ These could change the plan, so they happen at the start of the step that depend
 | 5 | Done: confirm D8 by running the real native-messaging path ([results](persepolis-observed.md#native-messaging)) |
 | 5 | **Still open:** the sandboxed Safari handler can write to the App Group and open a `swiftpolis://` link. The unsandboxed helper can |
 | 5 | **Still open:** clipboard detection under macOS 27's privacy prompts |
-| 6 | The PyInstaller-based `yt-dlp_macos` survives notarization, and can self-update from Application Support |
+| 6 | Done: yt-dlp self-updates from outside the app, and the signed helpers work ([results](persepolis-observed.md#early-checks-for-video)) |
+| 6 | **Still open:** the helpers survive notarization. It needs a Developer ID certificate |
+| 6 | **Still open:** a YouTube pair from start to finish. It needs YouTube to answer, or a browser's cookies |
 | 7 | libtorrent and Boost build statically for arm64 |

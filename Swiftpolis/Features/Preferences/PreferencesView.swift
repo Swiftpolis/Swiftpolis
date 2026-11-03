@@ -90,6 +90,11 @@ struct PreferencesView: View {
                 }
             }
             Toggle("Create subfolders for Audios, Videos, Documents, Compressed and Others", isOn: $viewModel.preferences.usesSubfolders)
+            Stepper(
+                "Links from a browser to open in Video Finder at once: \(viewModel.preferences.videoFinderMaxLinks)",
+                value: $viewModel.preferences.videoFinderMaxLinks,
+                in: 0...100
+            )
         }
         .formStyle(.grouped)
         .fileImporter(isPresented: $isChoosingFolder, allowedContentTypes: [.folder]) { result in

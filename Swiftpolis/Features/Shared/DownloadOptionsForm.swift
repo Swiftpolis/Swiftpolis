@@ -9,6 +9,8 @@ struct DownloadOptionsForm<General: View>: View {
     @Binding var draft: DownloadDraft
     let categories: [String]
     var createQueue: ((String) -> Void)?
+    /// Video Finder has its own, because there the link leads to a choice of formats.
+    var showsLinkAndName = true
     @ViewBuilder let general: General
 
     @State private var isChoosingFolder = false
@@ -28,10 +30,12 @@ struct DownloadOptionsForm<General: View>: View {
     private var generalTab: some View {
         Form {
             general
-            TextField("Link", text: $draft.link)
-            Toggle("Change file name", isOn: $draft.changesName)
-            TextField("File name", text: $draft.customName)
-                .disabled(!draft.changesName)
+            if showsLinkAndName {
+                TextField("Link", text: $draft.link)
+                Toggle("Change file name", isOn: $draft.changesName)
+                TextField("File name", text: $draft.customName)
+                    .disabled(!draft.changesName)
+            }
             LabeledContent("Download folder") {
                 HStack {
                     Text(draft.folder)

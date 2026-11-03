@@ -68,11 +68,11 @@ Full rules in [queue-and-schedule.md](queue-and-schedule.md).
 
 Details in [video-and-torrent.md](video-and-torrent.md).
 
-- [ ] Video Finder: format lists, thumbnail, duration, sizes, advanced options
-- [ ] Separate video and audio Downloads, then Muxing
-- [ ] Mux retry button; pair progress window
-- [ ] Single-video links (`.m3u8`)
-- [ ] Automatic routing from browser requests
+- [x] Video Finder: format lists, thumbnail, duration, sizes, advanced options
+- [x] Separate video and audio Downloads, then Muxing
+- [x] Mux retry button; pair progress window
+- [x] Single-video links (`.m3u8`)
+- [x] Automatic routing from browser requests
 
 ## BitTorrent
 
