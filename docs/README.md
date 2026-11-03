@@ -10,8 +10,8 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
   (`Side_Projects/persepolis`)
 - **Parity rule:** same rules, with known defects fixed ([ADR 0001](adr/0001-parity-with-defects-fixed.md))
 - **Distribution:** Developer ID, unsandboxed, GPLv3 ([ADR 0004](adr/0004-developer-id-gpl-unsandboxed.md))
-- **Status:** step 1 of 8 ([roadmap.md](roadmap.md)). The app opens with its Categories and can't
-  download anything yet.
+- **Status:** step 2 of 8 ([roadmap.md](roadmap.md)). The HTTP engine works and is tested, but the
+  app has no window to use it from yet.
 
 ## Documentation index
 
@@ -26,16 +26,17 @@ macOS 28 and later, where Rosetta 2 is no longer available for general Intel app
 | [data-model.md](data-model.md) | Persepolis tables and their lifecycle | From source |
 | [settings.md](settings.md) | Every preference and its default | From source |
 | [browser-integration.md](browser-integration.md) | Wire protocol, extension behaviour, Safari constraints | From source |
-| [upstream-defects.md](upstream-defects.md) | Persepolis bugs found while reading, to fix or keep | From source |
+| [persepolis-observed.md](persepolis-observed.md) | What the real HTTP engine did when run; the reference for tests | Observed |
+| [upstream-defects.md](upstream-defects.md) | Persepolis bugs Swiftpolis fixes | Mixed |
 | [architecture.md](architecture.md) | Proposed MVVM structure | Draft |
 | [project-structure.md](project-structure.md) | Where the code is, file by file | Living |
 | [setup-and-build.md](setup-and-build.md) | Run the tests and the app; the project file format | Living |
 | [roadmap.md](roadmap.md) | Build order and the early checks in each step | Living |
 | [adr/](adr/) | Hard-to-reverse decisions, 0001 to 0009 | Living |
 
-"From source" docs describe what Persepolis does, found by reading its code. The
-code was not run, so runtime claims have not been confirmed by observation. They
-are not a Swiftpolis design.
+"From source" docs describe what Persepolis does, found by reading its code, and they
+are not a Swiftpolis design. Where one disagrees with
+[persepolis-observed.md](persepolis-observed.md), the observation wins.
 
 ## 30-second mental model of Persepolis
 

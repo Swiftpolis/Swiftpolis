@@ -24,11 +24,24 @@ SwiftpolisKit/                     Local Swift package
 │   ├── SwiftpolisPersistence/
 │   │   ├── LibrarySchema.swift        @Model types and the versioned schema
 │   │   └── LibraryRepository.swift    All library reads and writes
+│   ├── SwiftpolisEngines/
+│   │   ├── DownloadEngine.swift       The shape all engines share, and its value types
+│   │   ├── HTTPDownloadEngine.swift   Runs one HTTP download from start to finish
+│   │   ├── PartWorker.swift           One Connection: fetches Parts, writes and paces
+│   │   ├── RequestFactory.swift       Sessions, requests, proxies, cookies, redirects
+│   │   ├── PartPlan.swift             How a file splits into Parts
+│   │   ├── ControlFile.swift          The .persepolis format and the resume decision
+│   │   ├── FileNaming.swift           File names, unique names and subfolders
+│   │   └── RequestRules.swift         Header and cookie text, retry and Speed dial rules
 │   └── SwiftpolisTestSupport/
-│       └── ManualClock.swift          A clock tests move by hand
+│       ├── ManualClock.swift          A clock tests move by hand
+│       └── MisbehavingServer.swift    A local HTTP server that fails on request
 └── Tests/
     ├── SwiftpolisDomainTests/
-    └── SwiftpolisPersistenceTests/
+    ├── SwiftpolisPersistenceTests/
+    └── SwiftpolisEnginesTests/
 
+tools/
+└── persepolis-characterization/   Runs real Persepolis against a test server
 docs/                              This documentation
 ```

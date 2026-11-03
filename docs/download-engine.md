@@ -1,7 +1,9 @@
 # HTTP download engine
 
-What `persepolis/scripts/persepolis_lib_prime.py` does. It supports HTTP and HTTPS only.
-FTP left with aria2, even though the browser extension still matches `ftp://` pages.
+Most of this doc is what `persepolis/scripts/persepolis_lib_prime.py` does. It supports HTTP and
+HTTPS only. FTP left with aria2, even though the browser extension still matches `ftp://` pages.
+What the real engine did when run is in [persepolis-observed.md](persepolis-observed.md), and how the
+Swift engine differs is under [The Swift engine](#the-swift-engine).
 
 ## Lifecycle
 
@@ -153,13 +155,26 @@ Connections, rate, ETA, link and error. Main-window polling:
 Download is added without starting. Failures are ignored. Unknown values show as `***`
 until a Download starts.
 
-## Port notes
+## The Swift engine
 
-Decided in [ADR 0002](adr/0002-port-engine-to-urlsession.md): `URLSession`, one session per
-Connection. `requests` always uses HTTP/1.1, so 64 workers means 64 TCP connections, whereas
-`URLSession` negotiates HTTP/2 and would multiplex a shared session onto one connection.
+`HTTPDownloadEngine` in `SwiftpolisEngines`, built on `URLSession` with one session per Connection
+([ADR 0002](adr/0002-port-engine-to-urlsession.md)). It keeps the rules above and fixes D4, D6, D7,
+D12, D13, D14, D15, D16, D19, D20, D21, D22, D23, D24, D25, D26 and D27.
 
-Still to verify in the first engine spike:
+**Scheduling isn't here.** The engine has no clock. Start times, End times and status `scheduled`
+belong to the service that runs it, in step 4.
 
-- That a session per Connection really produces separate connections against an HTTP/2 server.
-- Proxy authentication and SOCKS5 through `ProxyConfiguration`.
+Differences that aren't bug fixes:
+
+| Persepolis | Swiftpolis | Why |
+| --- | --- | --- |
+| Fills a new file with zeros | Sets its length with `ftruncate` | Instant on APFS, and the free-space check still runs first. Out-of-space can now appear during the download, as a write error |
+| Connections read fixed chunks | `URLSession` delivers varying amounts, so the Speed dial waits in proportion to the bytes received | Same formula and same average delay |
+| Holds workers in a loop to pause | Holds the worker's delegate queue | `suspend()` keeps delivering data. See [persepolis-observed.md](persepolis-observed.md) |
+| Reads `Accept-Encoding` defaults | Always asks for `identity` | Compression would change the byte offsets Parts rely on |
+| A failed HEAD status still supplies a size | A status of 400 or above ignores the HEAD | The GET decides, so an error page's length can't be taken for the file's |
+| User agent `PersepolisDM/<version>` | `Swiftpolis/<version>` | Names the actual client |
+| HTTP proxy for everything | HTTP proxies use `connectionProxyDictionary`, SOCKS5 uses `ProxyConfiguration` | Each is the only API that behaves correctly for that kind of proxy |
+
+**Not covered by automated tests:** SOCKS5 and `https` through an HTTP proxy, because they need a real
+remote host. They passed a manual check against one. Certificate skipping hasn't been run at all yet.

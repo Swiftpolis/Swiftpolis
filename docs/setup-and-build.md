@@ -8,7 +8,20 @@ Needs Xcode 27.2 or later on an Apple silicon Mac running macOS 27.
 cd SwiftpolisKit && swift test
 ```
 
-Tests cover the package. Views are checked by running the app.
+Tests cover the package. Views are checked by running the app. Engine tests run against a server on
+loopback and take about 15 seconds.
+
+## Record Persepolis's behaviour
+
+This runs the real engine from a Persepolis checkout against a misbehaving local server, and prints
+JSON. `HOME` must be a temporary folder, or Persepolis writes its logs into your real config folder.
+Replace `<persepolis>` with the path to your checkout.
+
+```bash
+HOME=$(mktemp -d) PYTHONPATH=<persepolis> <persepolis>/venv/bin/python tools/persepolis-characterization/observe_http_engine.py
+```
+
+[persepolis-observed.md](persepolis-observed.md) records what the results meant.
 
 ## Run the app
 
