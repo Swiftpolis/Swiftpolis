@@ -7,7 +7,7 @@ Needs Xcode 27.2 or later on an Apple silicon Mac running macOS 27.
 SwiftpolisKit is a separate repository, included as a Git submodule, so clone with it:
 
 ```bash
-git clone --recurse-submodules https://github.com/OWNER/Swiftpolis.git
+git clone --recurse-submodules https://github.com/Swiftpolis/Swiftpolis.git
 ```
 
 In a copy cloned without it, this fetches it:
@@ -59,9 +59,8 @@ simulator and share it to Swiftpolis, then open the app. On a device, both targe
 
 ## Publish a release
 
-The update check reads the latest release on GitHub. Set `ProjectLinks.owner` in
-`Swiftpolis/App/ProjectLinks.swift` to the account that hosts the project, because until then the check
-says it isn't set up. Raise `MARKETING_VERSION` in the project, then publish a GitHub release tagged with
+The update check reads the latest release of `Swiftpolis/Swiftpolis` on GitHub. If the project moves to
+another account, change `ProjectLinks.owner` in `Swiftpolis/App/ProjectLinks.swift`. Raise `MARKETING_VERSION` in the project, then publish a GitHub release tagged with
 that version, such as `v1.1.0`. Its description becomes the notes people see.
 
 ## Debug automation

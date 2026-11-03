@@ -2,9 +2,9 @@ import Foundation
 
 /// Where the project lives online.
 enum ProjectLinks {
-    /// The GitHub account that hosts Swiftpolis. Until this is filled in, the update check says it isn't
-    /// set up, and the About window leaves out the project's links.
-    static let owner: String? = nil
+    /// The GitHub account that hosts Swiftpolis. The update check and the About window's links use it. With
+    /// `nil`, the check says it isn't set up, and the links are left out.
+    static let owner: String? = "Swiftpolis"
 
     static var repository: String? { owner.map { "\($0)/Swiftpolis" } }
     static var page: URL? { repository.flatMap { URL(string: "https://github.com/\($0)") } }

@@ -39,7 +39,7 @@ It needs iOS 18 or later.
 You need an Apple silicon Mac running macOS 27, and Xcode 27.2 or later. The Mac app needs macOS 27 too.
 
 ```bash
-git clone --recurse-submodules https://github.com/OWNER/Swiftpolis.git
+git clone --recurse-submodules https://github.com/Swiftpolis/Swiftpolis.git
 ```
 
 ```bash
@@ -64,7 +64,7 @@ scheme for the Mac, or `SwiftpolisMobile` for iPhone and iPad, which doesn't nee
 | `Swiftpolis/` | The Mac app: SwiftUI views and view models |
 | `SwiftpolisMobile/` | The iPhone and iPad app |
 | `ShareExtension/` | Sends links from other apps to the iPhone and iPad app |
-| [`SwiftpolisKit/`](https://github.com/OWNER/SwiftpolisKit) | The package with the engines, storage and rules, as a Git submodule |
+| [`SwiftpolisKit/`](https://github.com/Swiftpolis/SwiftpolisKit) | The package with the engines, storage and rules, as a Git submodule |
 | `SafariExtension/` | The Safari extension |
 | `NativeHost/` | The helper that Chrome, Firefox and others talk to |
 | `docs/` | Architecture, decisions, and how behaviour matches Persepolis |
