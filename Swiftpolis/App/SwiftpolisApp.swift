@@ -72,7 +72,7 @@ struct SwiftpolisApp: App {
             PreferencesView(model: model)
         }
 
-        MenuBarExtra("Swiftpolis", systemImage: "arrow.down.circle", isInserted: $model.preferences.showsMenuBarItem) {
+        MenuBarExtra("Swiftpolis", systemImage: "laptopcomputer.and.arrow.down", isInserted: $model.preferences.showsMenuBarItem) {
             MenuBarContent(model: model)
         }
     }

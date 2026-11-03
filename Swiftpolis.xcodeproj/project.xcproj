@@ -39,14 +39,19 @@
           ],
         },
       ],
-    },
-    {
+    }, {
+      "path": "SwiftpolisIcon.icon",
+      "target-membership": [
+        "Swiftpolis/resources",
+        "SwiftpolisSafari/resources",
+      ],
+    }, {
       "kind": "group",
       "name": "Products",
       "children": [
         { "path": "<PRODUCTS>/Swiftpolis.app", "id": "2E17325C309941ED00B995DB", "type": "wrapper.application", "index": false },
         { "path": "<PRODUCTS>/SwiftpolisSafari.appex", "id": "2E17325C309941ED00B995DC", "type": "wrapper.app-extension", "index": false, "target-membership": [ { "build-phase": "Swiftpolis/copy/Embed Foundation Extensions", "header-preservation": "remove-on-copy" } ] },
-        { "path": "<PRODUCTS>/swiftpolis-native-host", "id": "2E17325C309941ED00B995DD", "type": "compiled.mach-o.executable", "index": false, "target-membership": [ { "build-phase": "Swiftpolis/copy/Embed Native Host" } ] },
+        { "path": "<PRODUCTS>/swiftpolis-native-host", "id": "2E17325C309941ED00B995DD", "type": "compiled.mach-o.executable", "index": false, "target-membership": [ "Swiftpolis/copy/Embed Native Host" ] },
       ],
     },
   ],
@@ -68,13 +73,11 @@
           "kind": "copy",
           "name": "Embed Foundation Extensions",
           "bundle-base-path": "plugins-directory",
-        },
-        {
+        }, {
           "kind": "copy",
           "name": "Embed Native Host",
           "bundle-base-path": "executables-directory",
-        },
-        {
+        }, {
           "kind": "script",
           "name": "Embed Helpers",
           "log-environment-variables": true,
@@ -84,25 +87,26 @@
       ],
       "package-product-members": [
         {
-          "product-name": "SwiftpolisDomain",
+          "product-name": "SwiftpolisBridge",
           "build-phase": { "build-phase": "frameworks" },
         }, {
-          "product-name": "SwiftpolisPersistence",
+          "product-name": "SwiftpolisDomain",
           "build-phase": { "build-phase": "frameworks" },
         }, {
           "product-name": "SwiftpolisEngines",
           "build-phase": { "build-phase": "frameworks" },
         }, {
-          "product-name": "SwiftpolisServices",
+          "product-name": "SwiftpolisPersistence",
           "build-phase": { "build-phase": "frameworks" },
         }, {
-          "product-name": "SwiftpolisBridge",
+          "product-name": "SwiftpolisServices",
           "build-phase": { "build-phase": "frameworks" },
         },
       ],
       "build-settings": {
-        "ASSETCATALOG_COMPILER_APPICON_NAME": "AppIcon",
+        "ASSETCATALOG_COMPILER_APPICON_NAME": "SwiftpolisIcon",
         "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
+        "ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS": "YES",
         "CODE_SIGN_ENTITLEMENTS": "Swiftpolis.entitlements",
         "CODE_SIGN_STYLE": "Automatic",
         "COMBINE_HIDPI_IMAGES": "YES",
@@ -114,13 +118,14 @@
         "ENABLE_USER_SCRIPT_SANDBOXING": "NO",
         "GENERATE_INFOPLIST_FILE": "YES",
         "INFOPLIST_FILE": "Swiftpolis-Info.plist",
+        "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.utilities",
         "INFOPLIST_KEY_NSAppleEventsUsageDescription": "Swiftpolis asks System Events to shut down your Mac when a queue or download you chose finishes.",
         "INFOPLIST_KEY_NSHumanReadableCopyright": "",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
           "@executable_path/../Frameworks",
         ],
-        "MARKETING_VERSION": "1.0",
+        "MARKETING_VERSION": "1.0.0",
         "PRODUCT_BUNDLE_IDENTIFIER": "com.amirabravesh.Swiftpolis",
         "PRODUCT_NAME": "$(TARGET_NAME)",
         "REGISTER_APP_GROUPS": "YES",
@@ -131,11 +136,10 @@
         "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
         "SWIFT_VERSION": "6.0",
       },
-    },
-    {
+    }, {
       "name": "SwiftpolisSafari",
       "id": "2E17325B309941ED00B995DC",
-      "product": "id:2E17325C309941ED00B995DC",
+      "product": "Products/SwiftpolisSafari.appex",
       "product-type": "app-extension",
       "build-phases": [
         "compile-sources",
@@ -164,7 +168,7 @@
           "@executable_path/../Frameworks",
           "@executable_path/../../../../Frameworks",
         ],
-        "MARKETING_VERSION": "1.0",
+        "MARKETING_VERSION": "1.0.0",
         "OTHER_LDFLAGS": [
           "-framework",
           "SafariServices",
@@ -175,11 +179,10 @@
         "SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY": "YES",
         "SWIFT_VERSION": "6.0",
       },
-    },
-    {
+    }, {
       "name": "swiftpolis-native-host",
       "id": "2E17325B309941ED00B995DD",
-      "product": "id:2E17325C309941ED00B995DD",
+      "product": "Products/swiftpolis-native-host",
       "product-type": "tool",
       "build-phases": [
         "compile-sources",
