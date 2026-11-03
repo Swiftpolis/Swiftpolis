@@ -23,6 +23,8 @@ import SwiftpolisServices
 ///   bar item does, and prints the Dock state at each point.
 /// - `SWIFTPOLIS_DEBUG_PASTE`: text to paste, from a private pasteboard, into the first field of the window
 ///   named by `SWIFTPOLIS_DEBUG_PASTE_WINDOW`. It reports which windows are open afterwards.
+/// - `SWIFTPOLIS_DEBUG_BATCH_START`: a Category for the batch window to add to and start, as its Add and
+///   Start button does, once it has the names. A Queue of that name is created if there isn't one.
 /// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
@@ -41,6 +43,10 @@ enum DebugAutomation {
 
     static var submitsVideoFinder: Bool {
         isActive && ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_VIDEO_SUBMIT"] != nil
+    }
+
+    static var batchStartCategory: String? {
+        isActive ? ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_BATCH_START"] : nil
     }
 
     static var updatesHelpers: Bool {

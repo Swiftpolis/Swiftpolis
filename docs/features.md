@@ -20,6 +20,7 @@ Persepolis's mechanism.
 - [x] Clipboard monitoring ([D5](upstream-defects.md))
 - [x] A list of links in a Link field moves to the batch window, in Add Link and Video Finder (new in Swiftpolis)
 - [x] Batch window: per-link selection, select all, shared proxy, auth and folder options
+- [x] Batch window's Add and Start: a Queue starts, and Single Downloads all start together (new in Swiftpolis)
 - [x] Spider fills in name and size in the background
 
 ## Download control

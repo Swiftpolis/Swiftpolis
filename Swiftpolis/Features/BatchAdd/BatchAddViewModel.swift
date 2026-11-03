@@ -23,6 +23,13 @@ final class BatchAddViewModel {
     func load() async {
         await reloadCategories()
         await lookUpNames()
+        #if DEBUG
+        if let category = DebugAutomation.batchStartCategory {
+            if !categories.contains(category) { await createQueue(named: category) }
+            draft.options.category = category
+            _ = await add(startsThem: true)
+        }
+        #endif
     }
 
     private func reloadCategories() async {
@@ -69,16 +76,28 @@ final class BatchAddViewModel {
         }
     }
 
-    /// Adds the selected links, none of them started, as in Persepolis. Returns true once done.
-    func add() async -> Bool {
+    /// Adds the selected links. Returns true once done. Without `startsThem` none of them start, as in
+    /// Persepolis. With it, a Queue starts and runs them from the top, and Single Downloads all start
+    /// together, without a progress or after-download window each.
+    func add(startsThem: Bool = false) async -> Bool {
+        let category = draft.options.category
+        let isQueue = CategoryKind(categoryName: category) == .queue
         do {
             for addition in draft.selectedInAddingOrder {
-                try await services.coordinator.add(
+                let gid = try await services.coordinator.add(
                     addition.request,
                     secrets: addition.secrets,
-                    to: draft.options.category,
-                    startNow: false
+                    to: category,
+                    startNow: startsThem
                 )
+                if startsThem, !isQueue { model.markBatchStarted(gid) }
+            }
+            if startsThem {
+                if isQueue {
+                    try await services.coordinator.startQueue(category)
+                } else {
+                    model.notify("Download Starts", sound: nil)
+                }
             }
             return true
         } catch {

@@ -64,6 +64,7 @@ final class AppModel {
     /// Links waiting for a window to open and ask for them. Windows are given a key rather than the
     /// links, so that cookies never become part of a window's saved state.
     @ObservationIgnored private var waitingAddLinks: [String: BrowserLink] = [:]
+    @ObservationIgnored private var batchStartedDownloads: Set<GID> = []
     @ObservationIgnored private var waitingBatches: [String: [BrowserLink]] = [:]
     @ObservationIgnored private var waitingVideoLinks: [String: BrowserLink] = [:]
 
@@ -315,6 +316,11 @@ final class AppModel {
 
     // MARK: Starting and finishing
 
+    /// Marks a Single Download started with others, so a season doesn't end in a window per episode.
+    func markBatchStarted(_ gid: GID) {
+        batchStartedDownloads.insert(gid)
+    }
+
     /// Shows a just-started Download's progress window and says it has started.
     func didStart(_ gid: GID, isScheduled: Bool) {
         notify(isScheduled ? "Download Scheduled" : "Download Starts", sound: nil)
@@ -335,7 +341,8 @@ final class AppModel {
         switch download.status {
         case .complete:
             notify("Download Complete", body: name, sound: .ok)
-            if preferences.showsAfterDownloadDialog {
+            let wasBatchStarted = batchStartedDownloads.remove(download.gid) != nil
+            if preferences.showsAfterDownloadDialog, !wasBatchStarted {
                 openWindowAction?(id: WindowID.afterDownload, value: download.gid.rawValue)
                 NSApp.activate()
             }

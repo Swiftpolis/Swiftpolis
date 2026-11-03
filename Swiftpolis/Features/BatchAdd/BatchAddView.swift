@@ -25,6 +25,10 @@ struct BatchAddView: View {
                 Button("Cancel", role: .cancel) { dismiss() }
                     .keyboardShortcut(.cancelAction)
                 Spacer()
+                Button("Add and Start") {
+                    Task { if await viewModel.add(startsThem: true) { dismiss() } }
+                }
+                .disabled(!viewModel.draft.hasSelection)
                 Button("OK") {
                     Task { if await viewModel.add() { dismiss() } }
                 }
