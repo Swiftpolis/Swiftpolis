@@ -64,7 +64,9 @@ Full rules in [queue-and-schedule.md](queue-and-schedule.md).
 - [x] Progress window: After-download shutdown
 - [x] After-download dialog: open file, open folder, "don't show again"
 - [ ] Log window with copy and report actions
-- [ ] About, Help, Report Issue, new-version check
+- [x] About window, with the license and third-party notices
+- [x] New-version check against GitHub Releases, on request and once a day (needs `ProjectLinks.owner`)
+- [ ] Help and Report Issue menu items
 
 ## Video
 

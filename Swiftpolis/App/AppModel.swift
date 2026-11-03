@@ -16,6 +16,8 @@ enum WindowID {
     static let afterDownload = "after-download"
     static let batchAdd = "batch-add"
     static let videoFinder = "video-finder"
+    static let about = "about"
+    static let updates = "updates"
 }
 
 /// What the whole app shares: the services, live progress and preferences.
@@ -130,6 +132,7 @@ final class AppModel {
             Task { await listen(to: coordinator) }
             Task { await watchClipboard() }
             Task { await updateHelpers() }
+            Task { await checkForUpdatesIfDue() }
             drainInbox()
         } catch {
             state = .failed(message: error.localizedDescription)
@@ -173,6 +176,35 @@ final class AppModel {
         store.lastYtDlpUpdateCheck = await Task.detached {
             await helpers.updateIfDue(lastCheck: lastCheck)
         }.value
+    }
+
+    // MARK: Updates
+
+    var appVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+    }
+
+    /// `nil` until the project has a GitHub repository to check.
+    var updateChecker: UpdateChecker? {
+        #if DEBUG
+        if let api = DebugAutomation.updateAPI { return UpdateChecker(repository: "someone/Swiftpolis", apiBase: api) }
+        #endif
+        return ProjectLinks.repository.map { UpdateChecker(repository: $0) }
+    }
+
+    /// Says so only if there's something new. Failures wait for tomorrow's check.
+    private func checkForUpdatesIfDue() async {
+        #if DEBUG
+        guard !DebugAutomation.isActive || DebugAutomation.updateAPI != nil else { return }
+        #endif
+        let store = preferencesStore
+        guard preferences.checksForUpdates, let updateChecker,
+              UpdateChecker.isDue(lastCheck: store.lastAppUpdateCheck, now: .now)
+        else { return }
+        store.lastAppUpdateCheck = .now
+        if case .available(let release) = try? await updateChecker.check(currentVersion: appVersion) {
+            notify("Swiftpolis \(release.version) is available", body: "Choose Check for Updates to see what's new.", sound: nil)
+        }
     }
 
     // MARK: Links from elsewhere

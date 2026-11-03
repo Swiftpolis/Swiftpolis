@@ -45,7 +45,10 @@
         "Swiftpolis/resources",
         "SwiftpolisSafari/resources",
       ],
-    }, {
+    },
+    { "path": "LICENSE", "target-membership": [ "Swiftpolis/resources" ] },
+    { "path": "THIRD-PARTY-NOTICES.md", "target-membership": [ "Swiftpolis/resources" ] },
+    {
       "kind": "group",
       "name": "Products",
       "children": [
@@ -120,7 +123,7 @@
         "INFOPLIST_FILE": "Swiftpolis-Info.plist",
         "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.utilities",
         "INFOPLIST_KEY_NSAppleEventsUsageDescription": "Swiftpolis asks System Events to shut down your Mac when a queue or download you chose finishes.",
-        "INFOPLIST_KEY_NSHumanReadableCopyright": "",
+        "INFOPLIST_KEY_NSHumanReadableCopyright": "Copyright © 2026 Amir Abravesh. GPLv3.",
         "LD_RUNPATH_SEARCH_PATHS": [
           "$(inherited)",
           "@executable_path/../Frameworks",

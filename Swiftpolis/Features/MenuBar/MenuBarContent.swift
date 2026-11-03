@@ -20,6 +20,8 @@ struct MenuBarContent: View {
         Button("Show Main Window") {
             model.present(id: WindowID.main)
         }
+        Button("About Swiftpolis") { model.present(id: WindowID.about) }
+        Button("Check for Updates...") { model.present(id: WindowID.updates) }
         Button("Exit") { NSApp.terminate(nil) }
     }
 }

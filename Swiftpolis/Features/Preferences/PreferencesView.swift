@@ -129,6 +129,7 @@ struct PreferencesView: View {
             Toggle("Keep the system awake while downloading", isOn: $viewModel.preferences.keepsSystemAwake)
             Toggle("Start links from the browser straight away", isOn: $viewModel.preferences.startsBrowserRequestsImmediately)
             Toggle("Check the clipboard for copied links", isOn: $viewModel.preferences.checksClipboard)
+            Toggle("Check for updates once a day", isOn: $viewModel.preferences.checksForUpdates)
             Toggle(
                 "Open at login",
                 isOn: Binding(get: { viewModel.startsAtLogin }, set: { viewModel.setStartsAtLogin($0) })

@@ -27,6 +27,7 @@ import SwiftpolisServices
 ///   Start button does, once it has the names. A Queue of that name is created if there isn't one.
 /// - `SWIFTPOLIS_DEBUG_FRONT_CHECK`: when set, puts Finder in front and opens windows as a browser link and
 ///   the menu bar item do, reporting after each whether the window came to the front.
+/// - `SWIFTPOLIS_DEBUG_UPDATE_API`: a server to ask for the latest release, in place of GitHub.
 /// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
@@ -49,6 +50,11 @@ enum DebugAutomation {
 
     static var batchStartCategory: String? {
         isActive ? ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_BATCH_START"] : nil
+    }
+
+    static var updateAPI: URL? {
+        guard isActive else { return nil }
+        return ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_UPDATE_API"].flatMap(URL.init(string:))
     }
 
     static var updatesHelpers: Bool {

@@ -2,6 +2,23 @@
 
 Needs Xcode 27.2 or later on an Apple silicon Mac running macOS 27.
 
+## Get the code
+
+SwiftpolisKit is a separate repository, included as a Git submodule, so clone with it:
+
+```bash
+git clone --recurse-submodules https://github.com/OWNER/Swiftpolis.git
+```
+
+In a copy cloned without it, this fetches it:
+
+```bash
+git submodule update --init
+```
+
+To change the kit, commit inside `SwiftpolisKit/` and push it first. Then commit the new `SwiftpolisKit`
+pointer in this repository, so nobody clones a pointer to a commit that isn't on GitHub.
+
 ## Get the helpers
 
 Video Finder needs yt-dlp, Deno and ffmpeg, and they aren't in the repository. This puts them in `Helpers/bin/`:
@@ -23,6 +40,13 @@ Tests cover the package. Views are checked by running the app. Engine tests run 
 loopback and take about 15 seconds. Three of them run the real yt-dlp, if the helpers are there. One test writes a throwaway item to your login Keychain and removes it.
 
 The first real download into `~/Downloads` may make macOS ask for permission to use that folder.
+
+## Publish a release
+
+The update check reads the latest release on GitHub. Set `ProjectLinks.owner` in
+`Swiftpolis/App/ProjectLinks.swift` to the account that hosts the project, because until then the check
+says it isn't set up. Raise `MARKETING_VERSION` in the project, then publish a GitHub release tagged with
+that version, such as `v1.1.0`. Its description becomes the notes people see.
 
 ## Debug automation
 

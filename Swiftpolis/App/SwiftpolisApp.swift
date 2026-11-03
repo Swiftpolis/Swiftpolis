@@ -33,6 +33,20 @@ struct SwiftpolisApp: App {
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
 
+        Window("About Swiftpolis", id: WindowID.about) {
+            AboutView()
+        }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(.suppressed)
+        .restorationBehavior(.disabled)
+
+        Window("Software Update", id: WindowID.updates) {
+            UpdateView(model: model)
+        }
+        .windowResizability(.contentSize)
+        .defaultLaunchBehavior(.suppressed)
+        .restorationBehavior(.disabled)
+
         WindowGroup("Add Links", id: WindowID.batchAdd, for: String.self) { $key in
             if let services = model.services, let key, let links = model.waitingBatch(key) {
                 BatchAddView(model: model, services: services, links: links)
@@ -87,6 +101,10 @@ struct AppCommands: Commands {
     @Environment(\.openWindow) private var openWindow
 
     var body: some Commands {
+        CommandGroup(replacing: .appInfo) {
+            Button("About Swiftpolis") { openWindow(id: WindowID.about) }
+            Button("Check for Updates...") { openWindow(id: WindowID.updates) }
+        }
         CommandGroup(replacing: .newItem) {
             Button("Add New Download Link") { openWindow(id: WindowID.addLink) }
                 .keyboardShortcut("n")

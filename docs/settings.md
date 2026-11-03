@@ -65,6 +65,7 @@ each one: native Mac behaviour, without the Qt style settings.
 | `browser-persepolis` | `yes` | Browser integration | Drop; the helpers are always installed |
 | `video_finder/max_links` | 3 | Max Video Finder windows per request | Keep |
 | None | Off | Keep the Dock icon when no windows are open | New. With no windows, the app stays in the menu bar and leaves the Dock. The Dock icon stays anyway if the menu bar item is off, or the app quits with its last window |
+| None | On | Check for updates once a day | New. Asks GitHub for the latest release, and sends a notification only if there's a newer one |
 
 ## Columns tab
 
