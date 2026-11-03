@@ -11,13 +11,20 @@ import SwiftpolisPersistence
 final class AddLinkViewModel {
     var draft: DownloadDraft {
         didSet {
-            if draft.link != oldValue.link { lookUpLink() }
+            guard draft.link != oldValue.link else { return }
+            if model.showBatch(forListIn: draft.link) {
+                movedToBatch = true
+            } else {
+                lookUpLink()
+            }
         }
     }
     private(set) var categories: [String] = [CategoryKind.singleDownloadsName]
     private(set) var foundName: String?
     private(set) var foundSize: String?
     var isAskingAboutDuplicate = false
+    /// The Link field was given a list, which the batch window has taken over.
+    private(set) var movedToBatch = false
 
     private let model: AppModel
     private let services: AppModel.Services

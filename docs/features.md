@@ -18,6 +18,7 @@ Persepolis's mechanism.
 - [x] Import links from a text file, one per line, into a Queue
 - [x] Import links from the clipboard into a Queue
 - [x] Clipboard monitoring ([D5](upstream-defects.md))
+- [x] A list of links in a Link field moves to the batch window, in Add Link and Video Finder (new in Swiftpolis)
 - [x] Batch window: per-link selection, select all, shared proxy, auth and folder options
 - [x] Spider fills in name and size in the background
 

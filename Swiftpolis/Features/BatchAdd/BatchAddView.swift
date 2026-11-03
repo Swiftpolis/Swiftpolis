@@ -49,7 +49,7 @@ struct BatchAddView: View {
             List($viewModel.draft.items) { $item in
                 Toggle(isOn: $item.isSelected) {
                     VStack(alignment: .leading) {
-                        Text(item.name ?? "***").lineLimit(1).truncationMode(.middle)
+                        Text(item.shownName).lineLimit(1).truncationMode(.middle)
                         Text(item.link.url)
                             .font(.caption)
                             .foregroundStyle(.secondary)

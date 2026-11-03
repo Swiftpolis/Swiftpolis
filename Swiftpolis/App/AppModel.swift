@@ -282,6 +282,15 @@ final class AppModel {
         }
     }
 
+    /// Opens the batch window if a Link field was given a whole list, such as a season's episodes.
+    /// Returns whether it did, so the field's window can make way for it.
+    func showBatch(forListIn text: String) -> Bool {
+        let links = LinkText.links(in: text)
+        guard links.count > 1 else { return false }
+        showBatch(for: links.map { BrowserLink(url: $0) })
+        return true
+    }
+
     /// Persepolis's clipboard monitoring, which never fired there (D5). The pasteboard's change count
     /// needs no permission. Looking for a link pattern before reading means the clipboard is only
     /// read, and macOS only asks, when there's a link to act on.

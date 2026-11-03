@@ -9,7 +9,15 @@ import SwiftpolisPersistence
 
 @Observable
 final class VideoFinderViewModel {
-    var draft: VideoFinderDraft
+    var draft: VideoFinderDraft {
+        didSet {
+            if draft.options.link != oldValue.options.link, model.showBatch(forListIn: draft.options.link) {
+                movedToBatch = true
+            }
+        }
+    }
+    /// The Link field was given a list, which the batch window has taken over.
+    private(set) var movedToBatch = false
     private(set) var categories: [String] = [CategoryKind.singleDownloadsName]
     private(set) var isFetching = false
     private(set) var errorMessage: String?

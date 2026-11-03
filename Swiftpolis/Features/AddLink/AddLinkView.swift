@@ -42,6 +42,7 @@ struct AddLinkView: View {
         }
         .frame(width: 560, height: 480)
         .task { await viewModel.load() }
+        .onChange(of: viewModel.movedToBatch) { close() }
         .onDisappear {
             if let waitingKey { model.forgetWaitingLinks(waitingKey) }
         }

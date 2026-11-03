@@ -40,6 +40,7 @@ struct VideoFinderView: View {
         }
         .frame(width: 620, height: 620)
         .task { await viewModel.load() }
+        .onChange(of: viewModel.movedToBatch) { close() }
         .onDisappear {
             if let waitingKey { model.forgetWaitingLinks(waitingKey) }
         }

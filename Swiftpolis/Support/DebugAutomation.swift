@@ -21,6 +21,8 @@ import SwiftpolisServices
 /// - `SWIFTPOLIS_DEBUG_VIDEO_SUBMIT`: when set, Video Finder also presses OK once it has the formats.
 /// - `SWIFTPOLIS_DEBUG_DOCK_CHECK`: when set, closes every window, reopens the main one the way the menu
 ///   bar item does, and prints the Dock state at each point.
+/// - `SWIFTPOLIS_DEBUG_PASTE`: text to paste, from a private pasteboard, into the first field of the window
+///   named by `SWIFTPOLIS_DEBUG_PASTE_WINDOW`. It reports which windows are open afterwards.
 /// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
@@ -104,6 +106,9 @@ enum DebugAutomation {
                 try? await Task.sleep(for: .seconds(2))
                 report("with the option on")
             }
+            if let text = environment["SWIFTPOLIS_DEBUG_PASTE"], let id = environment["SWIFTPOLIS_DEBUG_PASTE_WINDOW"] {
+                await paste(text, intoWindow: id)
+            }
             if let link = environment["SWIFTPOLIS_DEBUG_VIDEO"] {
                 model.showVideoFinder(for: BrowserLink(url: link))
             }
@@ -130,6 +135,36 @@ enum DebugAutomation {
                 model.didStart(gid, isScheduled: false)
             }
         }
+    }
+
+    /// Goes through the field editor's own paste, so the field treats the text as it would a real
+    /// one, without touching the clipboard.
+    private static func paste(_ text: String, intoWindow id: String) async {
+        func firstField(in view: NSView) -> NSTextField? {
+            if let field = view as? NSTextField, field.isEditable { return field }
+            return view.subviews.lazy.compactMap(firstField).first
+        }
+        let model = AppModel.shared
+        model.openWindowAction?(id: id)
+        NSApp.activate()
+        try? await Task.sleep(for: .seconds(2))
+        let titles = { NSApp.windows.filter(\.isVisible).map(\.title).filter { !$0.isEmpty } }
+        let window = NSApp.windows.first { $0.identifier?.rawValue.hasPrefix(id) == true }
+        guard let window, let content = window.contentView, let field = firstField(in: content) else {
+            print("paste: no field in \(titles())")
+            fflush(stdout)
+            return
+        }
+        window.makeKeyAndOrderFront(nil)
+        window.makeFirstResponder(field)
+        let pasteboard = NSPasteboard(name: .init("SwiftpolisDebugPaste"))
+        pasteboard.clearContents()
+        pasteboard.setString(text, forType: .string)
+        print("paste: into \(window.title), found patterns:", (try? await pasteboard.detectedPatterns(for: [\.probableWebURL])) ?? [])
+        (field.currentEditor() as? NSTextView)?.readSelection(from: pasteboard)
+        try? await Task.sleep(for: .seconds(2))
+        print("paste: the field holds \(field.stringValue.count) characters, \(field.stringValue.filter(\.isNewline).count) line breaks; windows: \(titles())")
+        fflush(stdout)
     }
 
     private static func startSnapshots(to folder: String) {
