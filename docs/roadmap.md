@@ -16,6 +16,9 @@ checklist of features is in [features.md](features.md).
 
 **Current state:** steps 1 to 6 are built. Step 6's "done when" isn't fully met: see below.
 
+**Menu bar and Dock:** with no windows open, the app stays in the menu bar and leaves the Dock, and Show Main Window
+brings it back. Preferences can keep the Dock icon. A debug run confirmed each state, but nobody has clicked it yet.
+
 **What step 6 has been through:** in the real app, with the helpers signed and bundled:
 
 - Separate streams from a local server were found, downloaded, muxed with the minimal ffmpeg, and came out as one

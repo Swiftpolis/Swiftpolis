@@ -124,6 +124,7 @@ struct PreferencesView: View {
             Toggle("Show the progress window", isOn: $viewModel.preferences.showsProgressWindow)
             Toggle("Show a window when a download finishes", isOn: $viewModel.preferences.showsAfterDownloadDialog)
             Toggle("Show in the menu bar", isOn: $viewModel.preferences.showsMenuBarItem)
+            Toggle("Keep the Dock icon when no windows are open", isOn: $viewModel.preferences.keepsDockIconWithoutWindows)
             Toggle("Keep running when the window closes", isOn: $viewModel.preferences.hidesWindowOnClose)
             Toggle("Keep the system awake while downloading", isOn: $viewModel.preferences.keepsSystemAwake)
             Toggle("Start links from the browser straight away", isOn: $viewModel.preferences.startsBrowserRequestsImmediately)

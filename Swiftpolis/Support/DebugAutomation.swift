@@ -19,6 +19,8 @@ import SwiftpolisServices
 ///   it and showing it in the main window.
 /// - `SWIFTPOLIS_DEBUG_VIDEO`: a link to open in Video Finder and fetch straight away.
 /// - `SWIFTPOLIS_DEBUG_VIDEO_SUBMIT`: when set, Video Finder also presses OK once it has the formats.
+/// - `SWIFTPOLIS_DEBUG_DOCK_CHECK`: when set, closes every window, reopens the main one the way the menu
+///   bar item does, and prints the Dock state at each point.
 /// - `SWIFTPOLIS_DEBUG_UPDATE`: when set, looks for a yt-dlp update as a normal launch would.
 enum DebugAutomation {
     private static var data: String? { ProcessInfo.processInfo.environment["SWIFTPOLIS_DEBUG_DATA"] }
@@ -76,6 +78,31 @@ enum DebugAutomation {
             let model = AppModel.shared
             for id in (environment["SWIFTPOLIS_DEBUG_OPEN"] ?? "").split(separator: ",") {
                 model.openWindowAction?(id: String(id))
+            }
+            if environment["SWIFTPOLIS_DEBUG_DOCK_CHECK"] != nil {
+                func report(_ moment: String) {
+                    print("\(moment): \(NSApp.activationPolicy() == .regular ? "in Dock" : "menu bar only")", terminator: " ")
+                    print("titled windows: \(NSApp.windows.filter { $0.styleMask.contains(.titled) && $0.isVisible }.count)")
+                    fflush(stdout)
+                }
+                try? await Task.sleep(for: .seconds(3))
+                report("window open")
+                for window in NSApp.windows where window.styleMask.contains(.titled) { window.close() }
+                try? await Task.sleep(for: .seconds(2))
+                report("no windows")
+                model.openWindowAction?(id: WindowID.main)
+                NSApp.activate()
+                try? await Task.sleep(for: .seconds(2))
+                report("reopened")
+                for window in NSApp.windows where window.styleMask.contains(.titled) { window.close() }
+                try? await Task.sleep(for: .seconds(2))
+                report("closed again")
+                var preferences = model.preferences
+                preferences.keepsDockIconWithoutWindows = true
+                model.preferences = preferences
+                NSApp.updateWindows()
+                try? await Task.sleep(for: .seconds(2))
+                report("with the option on")
             }
             if let link = environment["SWIFTPOLIS_DEBUG_VIDEO"] {
                 model.showVideoFinder(for: BrowserLink(url: link))

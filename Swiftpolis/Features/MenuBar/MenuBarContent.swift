@@ -25,6 +25,20 @@ struct MenuBarContent: View {
             NSApp.activate()
         }
         Button("Exit") { NSApp.terminate(nil) }
-            .onAppear { model.openWindowAction = openWindow }
+    }
+}
+
+/// The menu bar icon. It exists before any window, so it's what gives the app its way to open them.
+struct MenuBarLabel: View {
+    let model: AppModel
+    let systemImage: String
+    @Environment(\.openWindow) private var openWindow
+
+    var body: some View {
+        Image(systemName: systemImage)
+            .onAppear {
+                model.openWindowAction = openWindow
+                model.drainInbox()
+            }
     }
 }

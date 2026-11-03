@@ -12,6 +12,8 @@ struct SwiftpolisApp: App {
             MainWindowView(model: model)
         }
         .commands { AppCommands(model: model) }
+        // AppDelegate makes sure it opens at launch, even if it was closed when the app last quit.
+        .restorationBehavior(.disabled)
 
         WindowGroup("Add New Download Link", id: WindowID.addLink, for: String.self) { $key in
             if let services = model.services {
@@ -72,8 +74,10 @@ struct SwiftpolisApp: App {
             PreferencesView(model: model)
         }
 
-        MenuBarExtra("Swiftpolis", systemImage: "laptopcomputer.and.arrow.down", isInserted: $model.preferences.showsMenuBarItem) {
+        MenuBarExtra(isInserted: $model.preferences.showsMenuBarItem) {
             MenuBarContent(model: model)
+        } label: {
+            MenuBarLabel(model: model, systemImage: "laptopcomputer.and.arrow.down")
         }
     }
 }
