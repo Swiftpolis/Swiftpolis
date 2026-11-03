@@ -100,11 +100,19 @@
 
             const label = document.createElement("label");
             label.htmlFor = checkboxId;
+            const name = document.createElement("span");
+            name.className = "pdm-link-name";
+            name.textContent = getFileNameFromUrl(link) || link;
+            const address = document.createElement("span");
+            address.className = "pdm-link-address";
             try{
-                label.textContent = decodeURIComponent(link);
+                address.textContent = decodeURIComponent(link);
             }catch (e) {
-                label.textContent = link;
+                address.textContent = link;
             }
+            label.appendChild(name);
+            label.appendChild(address);
+
             pdmLink.appendChild(checkbox);
             pdmLink.appendChild(label);
             // pdmLink.textContent = decodeURIComponent(link);

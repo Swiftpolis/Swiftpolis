@@ -1,72 +1,67 @@
 /*
-* pdm-chrome-wrapper (forked from uget-chrome-wrapper ) is an extension to integrate PDM Download manager
-* with Google Chrome, Chromium and Vivaldi in Linux and Windows.
-*
-* Copyright (C) 2016  Gobinath
-*
-* This program is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ * The toolbar popup. Forked from Persepolis's WebExtension, itself forked from uget-chrome-wrapper.
+ *
+ * Copyright (C) 2016  Gobinath
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
+const api = typeof browser !== "undefined" ? browser : chrome;
 
-if(typeof browser !== 'undefined' )
-    BrowserNameSpace = browser ;
-else if(typeof chrome !== 'undefined' )
-    BrowserNameSpace = chrome;
+const catchesLinks = document.getElementById("catches-links");
+const contextMenu = document.getElementById("context-menu");
+const keywords = document.getElementById("keywords");
 
-
-let keywordsDom,dlInterruptCheckBox, contextMenuCheckbox;
-
-
-function setExtensionConfig() {
-    let keywords = keywordsDom.val();
-    let pdmInterrupt = dlInterruptCheckBox.prop('checked');
-    let contextMenu = contextMenuCheckbox.prop('checked');
-
-
-    BrowserNameSpace.runtime.sendMessage({
-        type: "setExtensionConfig",
-        data: {
-            pdmInterrupt, contextMenu, keywords 
-        }
-    })
-
+function showCatching() {
+    document.body.classList.toggle("is-off", !catchesLinks.checked);
+    document.getElementById("status-text").textContent = catchesLinks.checked
+        ? "Catching file links"
+        : "Safari keeps its downloads";
 }
 
-//Do after load
-$(document).ready(function () {
-
-    BrowserNameSpace.runtime.sendMessage({ type: "getExtensionConfig" }).then((config) => {
-        let { pdmInterrupt, contextMenu, keywords } = config
-
-        //Init variables from config
-        keywordsDom = $('#keywords');
-        dlInterruptCheckBox = $('#chk-interrupt');
-        contextMenuCheckbox = $('#context_menu');
-
-        dlInterruptCheckBox.prop('checked', pdmInterrupt);
-
-        contextMenuCheckbox.prop('checked', contextMenu);
-        keywordsDom.val(keywords);
-
-
-        //Listen on changes and save them immediately
-        dlInterruptCheckBox.on("change", setExtensionConfig);
-        // keywordsDom.on("change",saveSettings);
-
-        keywordsDom.on("change paste keyup", setExtensionConfig);
-        contextMenuCheckbox.on("change", setExtensionConfig);
+function save() {
+    showCatching();
+    api.runtime.sendMessage({
+        type: "setExtensionConfig",
+        data: {
+            pdmInterrupt: catchesLinks.checked,
+            contextMenu: contextMenu.checked,
+            keywords: keywords.value,
+        },
     });
+}
 
+async function pickLinks(script) {
+    const [tab] = await api.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+    await api.runtime.sendMessage({ type: "pickLinks", tabId: tab.id, script });
+    window.close();
+}
 
+api.runtime.sendMessage({ type: "getExtensionConfig" }).then((config) => {
+    catchesLinks.checked = config.pdmInterrupt;
+    contextMenu.checked = config.contextMenu;
+    keywords.value = config.keywords;
+    showCatching();
+
+    catchesLinks.addEventListener("change", save);
+    contextMenu.addEventListener("change", save);
+    keywords.addEventListener("input", save);
 });
+
+// Safari on iPhone and iPad has no right-click menu to add to.
+if (!api.contextMenus) document.getElementById("context-menu-setting").hidden = true;
+
+document.getElementById("all-links").addEventListener("click", () => pickLinks("scripts/getall.js"));
+document.getElementById("selected-links").addEventListener("click", () => pickLinks("scripts/getselected.js"));

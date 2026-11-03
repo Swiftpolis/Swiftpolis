@@ -8,33 +8,28 @@ if (typeof BrowserNameSpace === "undefined") {
 function injectPdmModal(){
     const html = `
 <div id="pdm-modal-holder" class="pdm-modal-holder-hide">
-    <div id="pdm-modal">
+    <div id="pdm-modal" role="dialog" aria-label="Choose links for Swiftpolis">
         <div class="pdm-header">
-            <div class="pdm-logo"></div>
-            <span> Swiftpolis</span>
-        </div>
-
-        <div id="pdm_filter_title" style="margin: 15px; font-size: 1.5em; color:#00897b">Filter group downloads</div>
-        <div class="form">
-            <div class="pdm-inputs">
-                
-                <select id="pdm_include_or_exclude" class="pdm-select" style="display: inline-block">
-                    <option value="include"> Include</option>
-                    <option value="exclude"> Exclude </option>
-                </select>
-                
-                <input placeholder="in filename" type="text" id="pdm_text" class="pdm-input" style="display: inline-block">
-
-               <select id="pdm_include_extension" class="pdm-select" style="display: inline-block">
-                            
-               </select>
+            <div class="pdm-logo">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7 10.5l5 5 5-5M4 20.5h16"/></svg>
             </div>
-        </div> 
-        <div class="pdm-actions">
-            <pdminput id="pdm_captuare_links"> Capture <pdmlinkcount id="pdm-link-count"></pdmlinkcount> Links! </pdminput>
-            <pdminput id="pdm_cancel_modal"> Cancel </pdminput>
+            <div>
+                <span class="pdm-title">Choose links</span>
+                <span class="pdm-subtitle">They'll be sent to Swiftpolis</span>
+            </div>
         </div>
-        <div id="pdm-preview-links">
+        <div class="pdm-inputs">
+            <select id="pdm_include_or_exclude" class="pdm-select" aria-label="Keep or leave out">
+                <option value="include">Keep</option>
+                <option value="exclude">Leave out</option>
+            </select>
+            <input placeholder="links containing..." type="text" id="pdm_text" class="pdm-input">
+            <select id="pdm_include_extension" class="pdm-select" aria-label="File type"></select>
+        </div>
+        <div id="pdm-preview-links"></div>
+        <div class="pdm-actions">
+            <pdminput id="pdm_cancel_modal">Cancel</pdminput>
+            <pdminput id="pdm_captuare_links">Download <pdmlinkcount id="pdm-link-count"></pdmlinkcount></pdminput>
         </div>
     </div>
 </div>`;
@@ -50,13 +45,11 @@ function showPdmModal(extensions) {
         100);
     modalHolder.classList.remove('pdm-modal-holder-hide');
     const includeSelectOption = document.getElementById("pdm_include_extension");
-    let options = `<option value="no_extension">Select Extension</option>`;
+    let options = `<option value="no_extension">Any type</option>`;
     for( let k of Object.keys(extensions)){
         options+=`<option value="${PdmSanitizeHTML(k)}">${PdmSanitizeHTML(k)}</option>`;
     }
     includeSelectOption.innerHTML = options;
-
-    // document.body.classList.add('pdm-blurer');
 }
 
 function PdmSanitizeHTML(str) {
@@ -65,10 +58,7 @@ function PdmSanitizeHTML(str) {
     return temp.innerHTML;
 }
 function removePdmModal() {
-    // const modalHolder = document.getElementById('pdm-modal-holder');
-    // modalHolder.classList.add('pdm-modal-holder-hide');
-    const holder = document.getElementById("pdm-modal-holder");
-    holder.parentNode.removeChild(holder); // This syntax for delete dom is really dumb as fuck !
+    document.getElementById("pdm-modal-holder").remove();
 }
 function getFileNameFromUrl(link) {
     let possibleFileName = link.split('/').pop().split('#')[0].split('?')[0].trim();
@@ -89,7 +79,7 @@ function getExtensionOfUrl(link) {
     return !filename.match(/^([0-9a-z]+)$/i) || !isNaN(filename) ? "" : filename;
 }
 
-function sendToExtension(msg) {
+function sendPickedLinks(msg) {
     BrowserNameSpace.runtime.sendMessage({
         type:"getSelected",
         message: msg
@@ -97,7 +87,7 @@ function sendToExtension(msg) {
 }
 function dismissModal(links, success) {
     if(success)
-        sendToExtension(links);
+        sendPickedLinks(links);
     removePdmModal();
 
 }

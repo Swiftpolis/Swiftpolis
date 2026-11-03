@@ -71,6 +71,8 @@ async function setCatchesLinks(isOn) {
 }
 
 function setContextMenu(isOn) {
+    // Safari on iPhone and iPad doesn't have these. The popup offers the same things there.
+    if (!api.contextMenus) return;
     api.contextMenus.removeAll(() => {
         if (!isOn) return;
         api.contextMenus.create({ title: "Download with Swiftpolis", id: "download_with_pdm", contexts: ["link"] });
@@ -98,6 +100,10 @@ api.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case "getSelected":
         sendLinks(request.message, sender.url);
         break;
+
+    case "pickLinks":
+        injectLinkPicker(request.tabId, request.script).then(() => sendResponse({}));
+        return true;
 
     case "keyPress":
         if (request.message === "enable") {
@@ -129,7 +135,7 @@ async function injectLinkPicker(tabId, script) {
     await api.scripting.executeScript({ target: { tabId }, files: [script] });
 }
 
-api.contextMenus.onClicked.addListener((info, tab) => {
+api.contextMenus?.onClicked.addListener((info, tab) => {
     switch (info.menuItemId) {
     case "download_with_pdm":
         sendLinks([info.linkUrl], info.pageUrl);

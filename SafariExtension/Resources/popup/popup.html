@@ -1,77 +1,62 @@
 <!DOCTYPE html>
-<!-- pdm-chrome-wrapper (forked from uget-chrome-wrapper ) is an extension to integrate uGet Download manager
-~ with Google Chrome, Chromium and Vivaldi in Linux and Windows.
-~
-~ Copyright (C) 2016  Gobinath
-~
-~ This program is free software: you can redistribute it and/or modify
-~ it under the terms of the GNU General Public License as published by
-~ the Free Software Foundation, either version 3 of the License, or
-~ (at your option) any later version.
-~
-~ This program is distributed in the hope that it will be useful,
-~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-~ GNU General Public License for more details.
-~
-~ You should have received a copy of the GNU General Public License
-~ along with this program.  If not, see <http://www.gnu.org/licenses/>. -->
-
-<html>
+<html lang="en">
 <head>
-
-    <link rel="stylesheet" type="text/css" href="css/popup.css">
-    <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
-    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="js/materialize.min.js"></script>
-    <script src="js/popup.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Swiftpolis</title>
+    <link rel="stylesheet" href="css/popup.css">
+    <script src="js/popup.js" defer></script>
 </head>
 <body>
-<div class="container cont">
-    <div class="row">
-        <img id="img-icon" src="../icons/icon_48.png" /><h5 class="title-text">Swiftpolis</h5>
-    </div>
-    <hr class="hr">
-
-    <div class="row">
-        <div class="col s6">
-            <label for="chk-interrupt"><p>Catch file links:</p></label>
-            <div class="switch">
-                <label>
-                    Off
-                    <input type="checkbox" id="chk-interrupt">
-                    <span class="lever"></span>
-                    On
-                </label>
-            </div>
+<main class="popup">
+    <header class="masthead">
+        <img class="mark" src="../icons/icon_128.png" alt="">
+        <div>
+            <h1>Swiftpolis</h1>
+            <p class="status"><span class="status-dot"></span><span id="status-text">Catching file links</span></p>
         </div>
-        <div class="col s6">
-            <label for="context_menu"><p>Context Menu:</p></label>
-            <div class="switch">
-                <label>
-                    Off
-                    <input type="checkbox" id="context_menu">
-                    <span class="lever"></span>
-                    On
-                </label>
-            </div>
+    </header>
+
+    <label class="catch-card" for="catches-links">
+        <span class="catch-text">
+            <strong>Catch file links</strong>
+            <span>Clicking a file sends it to Swiftpolis instead of Safari.</span>
+        </span>
+        <input class="switch" type="checkbox" id="catches-links" role="switch">
+    </label>
+
+    <section aria-label="This page">
+        <h2>This page</h2>
+        <div class="actions">
+            <button type="button" class="action" id="all-links">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
+                <span>All links</span>
+            </button>
+            <button type="button" class="action" id="selected-links">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5 10 17.5 19 7"/></svg>
+                <span>Selected links</span>
+            </button>
         </div>
-    </div>
+    </section>
 
+    <section aria-label="Settings">
+        <h2>Settings</h2>
+        <div class="settings">
+            <label class="setting" id="context-menu-setting" for="context-menu">
+                <span>Add to the right-click menu</span>
+                <input class="switch" type="checkbox" id="context-menu" role="switch">
+            </label>
+            <label class="setting setting-stacked" for="keywords">
+                <span>Leave links alone if they contain</span>
+                <input class="field" id="keywords" type="text" placeholder=".jpg, .png, example.com"
+                       autocomplete="off" autocapitalize="off" spellcheck="false">
+            </label>
+        </div>
+    </section>
 
-    <br>
-    <label for="keywords"><p>Exclude URLs containing:</p></label>
-    <div class="input-field">
-        <i class="material-icons prefix">clear_all</i>
-        <input id="keywords" type="text" placeholder="Eg: .jpg, .png, twitter.com"  class="validate material-input">
-    </div>
-    <!--<div class="input-field">-->
-    <!--<i class="material-icons prefix">Minimum Size </i>-->
-    <!--<input id="fileSize" type="text" value="5 MB"  class="validate">-->
-    <!--</div>-->
-    Shortcuts:<br>
-    Disable extension temporary: Hold <div class="chip">` (Backquote)</div><br>
-    Toggle enable extension: <div class="chip">Ctrl + Shift + U</div><br>
-</div>
+    <footer class="shortcuts">
+        Hold <kbd>`</kbd> to let a click through. <kbd>⌃</kbd><kbd>⇧</kbd><kbd>U</kbd> switches catching on or off.
+    </footer>
+</main>
 </body>
 </html>
